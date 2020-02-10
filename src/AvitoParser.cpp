@@ -1,11 +1,10 @@
 #include "include/AvitoParser.h"
+#include "include/log.h"
 
 #include <restclient-cpp/restclient.h>
 #include <Document.h>
 #include <fmt/format.h>
 #include <Node.h>
-#include <fmt/color.h>
-#include <iostream>
 #include <regex>
 #include <thread>
 
@@ -92,9 +91,7 @@ void AvitoParser::parsePageAds(CDocument &doc)
             ads_.emplace_back(id, link, price, year, mileage);
         } catch (const ParseError &e)
         {
-            std::cout << fmt::format(fg(fmt::color::yellow), "Failed to fully parse ad {}: {}",
-                                     (id.empty() ? "?" : id), e.what())
-                      << std::endl;
+            logger->warn("Failed to fully parse ad {}: {}", (id.empty() ? "?" : id), e.what());
         }
     }
 }
