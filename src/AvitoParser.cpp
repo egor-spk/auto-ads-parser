@@ -1,5 +1,6 @@
 #include "include/AvitoParser.h"
 #include "include/log.h"
+#include "include/utils.h"
 
 #include <restclient-cpp/restclient.h>
 #include <Document.h>
@@ -128,21 +129,13 @@ uint32_t AvitoParser::getPrice(CNode &node)
     if (rawPrice.empty())
         throw ParseError("Found price is empty");
 
-    static std::regex reg("\\d", std::regex::ECMAScript);
-    auto numBegin =
-            std::sregex_iterator(rawPrice.begin(), rawPrice.end(), reg);
-    auto numEnd = std::sregex_iterator();
-    const auto countMatch = std::distance(numBegin, numEnd);
-    if (countMatch == 0)
-        throw ParseError("Unable to parse price");
-
-    std::string price;
-    price.reserve(countMatch);
-    std::for_each(numBegin, numEnd, [&price](const auto &match)
+    try
     {
-        price += match.str();
-    });
-    return std::stoi(price);
+        return utils::getDecimalFromStr(rawPrice);
+    } catch (const std::invalid_argument &e)
+    {
+        throw ParseError{e.what()};
+    }
 }
 
 uint16_t AvitoParser::getYear(CNode &node)
@@ -154,21 +147,13 @@ uint16_t AvitoParser::getYear(CNode &node)
     if (rawYear.empty())
         throw ParseError("Found year is empty");
 
-    static std::regex reg("\\d", std::regex::ECMAScript);
-    auto numBegin =
-            std::sregex_iterator(rawYear.begin(), rawYear.end(), reg);
-    auto numEnd = std::sregex_iterator();
-    const auto countMatch = std::distance(numBegin, numEnd);
-    if (countMatch == 0)
-        throw ParseError("Unable to parse year");
-
-    std::string year;
-    year.reserve(countMatch);
-    std::for_each(numBegin, numEnd, [&year](const auto &match)
+    try
     {
-        year += match.str();
-    });
-    return std::stoi(year);
+        return utils::getDecimalFromStr(rawYear);
+    } catch (const std::invalid_argument &e)
+    {
+        throw ParseError{e.what()};
+    }
 }
 
 uint32_t AvitoParser::getMileage(CNode &node)
@@ -185,19 +170,11 @@ uint32_t AvitoParser::getMileage(CNode &node)
         throw ParseError("Unable to parse mileage");
     rawMileage.erase(pos);
 
-    static std::regex reg("\\d", std::regex::ECMAScript);
-    auto numBegin =
-            std::sregex_iterator(rawMileage.begin(), rawMileage.end(), reg);
-    auto numEnd = std::sregex_iterator();
-    const auto countMatch = std::distance(numBegin, numEnd);
-    if (countMatch == 0)
-        throw ParseError("Unable to parse year");
-
-    std::string mileage;
-    mileage.reserve(countMatch);
-    std::for_each(numBegin, numEnd, [&mileage](const auto &match)
+    try
     {
-        mileage += match.str();
-    });
-    return std::stoi(mileage);
+        return utils::getDecimalFromStr(rawMileage);
+    } catch (const std::invalid_argument &e)
+    {
+        throw ParseError{e.what()};
+    }
 }

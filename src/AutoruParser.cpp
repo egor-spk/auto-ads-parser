@@ -1,5 +1,6 @@
 #include "include/AutoruParser.h"
 #include "include/log.h"
+#include "include/utils.h"
 
 #include <restclient-cpp/restclient.h>
 #include <Document.h>
@@ -31,7 +32,7 @@ void AutoruParser::parse()
         using namespace std::chrono_literals;
         std::this_thread::sleep_for(5s); // не наглеем
 
-         r = RestClient::get(fmt::format(link_, page));
+        r = RestClient::get(fmt::format(link_, page));
         doc.parse(r.body);
         parsePageAds(doc);
     }
@@ -99,10 +100,10 @@ void AutoruParser::parsePageAds(CDocument &doc)
 std::string AutoruParser::getLink(CNode &node)
 {
     auto select = node.find("a.ListingItemTitle-module__link");
-    if(select.nodeNum() == 0)
-         throw ParseError("Unable to find link");
+    if (select.nodeNum() == 0)
+        throw ParseError("Unable to find link");
     auto link = select.nodeAt(0).attribute("href");
-    if(link.empty())
+    if (link.empty())
         throw ParseError("Found link is empty");
     return link;
 }
@@ -112,7 +113,7 @@ std::string AutoruParser::getId(const std::string &link)
     static std::regex reg("\\d{10}-\\w{8}", std::regex::ECMAScript);
     std::smatch match;
     std::regex_search(link, match, reg);
-    if(match.empty() || match.size() > 1)
+    if (match.empty() || match.size() > 1)
         throw ParseError("Unable to parse id");
 
     return match[0].str();
@@ -121,35 +122,28 @@ std::string AutoruParser::getId(const std::string &link)
 uint32_t AutoruParser::getPrice(CNode &node)
 {
     auto select = node.find("div.ListingItemPrice-module__content");
-    if(select.nodeNum() == 0)
+    if (select.nodeNum() == 0)
         throw ParseError("Unable to find price");
     auto rawPrice = select.nodeAt(0).text();
-    if(rawPrice.empty())
+    if (rawPrice.empty())
         throw ParseError("Found price is empty");
 
-    static std::regex reg("\\d", std::regex::ECMAScript);
-    auto numBegin =
-            std::sregex_iterator(rawPrice.begin(), rawPrice.end(), reg);
-    auto numEnd = std::sregex_iterator();
-    const auto countMatch = std::distance(numBegin, numEnd);
-    if(countMatch == 0)
-        throw ParseError("Unable to parse price");
-
-    std::string price;
-    price.reserve(countMatch);
-    std::for_each(numBegin, numEnd, [&price](const auto& match) {
-        price += match.str();
-    });
-    return std::stoi(price);
+    try
+    {
+        return utils::getDecimalFromStr(rawPrice);
+    } catch (const std::invalid_argument &e)
+    {
+        throw ParseError{e.what()};
+    }
 }
 
 uint16_t AutoruParser::getYear(CNode &node)
 {
     auto select = node.find("div.ListingItem-module__year");
-    if(select.nodeNum() == 0)
+    if (select.nodeNum() == 0)
         throw ParseError("Unable to find year");
     auto year = select.nodeAt(0).text();
-    if(year.empty())
+    if (year.empty())
         throw ParseError("Found year is empty");
     return std::stoi(year);
 }
@@ -157,24 +151,17 @@ uint16_t AutoruParser::getYear(CNode &node)
 uint32_t AutoruParser::getMileage(CNode &node)
 {
     auto select = node.find("div.ListingItem-module__kmAge");
-    if(select.nodeNum() == 0)
+    if (select.nodeNum() == 0)
         throw ParseError("Unable to find mileage");
     auto rawMileage = select.nodeAt(0).text();
-    if(rawMileage.empty())
+    if (rawMileage.empty())
         throw ParseError("Found mileage is empty");
 
-    static std::regex reg("\\d", std::regex::ECMAScript);
-    auto numBegin =
-            std::sregex_iterator(rawMileage.begin(), rawMileage.end(), reg);
-    auto numEnd = std::sregex_iterator();
-    const auto countMatch = std::distance(numBegin, numEnd);
-    if(countMatch == 0)
-        throw ParseError("Unable to parse mileage");
-
-    std::string mileage;
-    mileage.reserve(countMatch);
-    std::for_each(numBegin, numEnd, [&mileage](const auto& match) {
-        mileage += match.str();
-    });
-    return std::stoi(mileage);
+    try
+    {
+        return utils::getDecimalFromStr(rawMileage);
+    } catch (const std::invalid_argument &e)
+    {
+        throw ParseError{e.what()};
+    }
 }
