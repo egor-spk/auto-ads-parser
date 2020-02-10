@@ -6,6 +6,10 @@
 
 namespace utils
 {
+    /**
+     * @brief Извлечение числа из произвольной строки
+     * @tparam T integral
+     */
     template <typename T = int>
     inline T getDecimalFromStr(const std::string &str)
     {
