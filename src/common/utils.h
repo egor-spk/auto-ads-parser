@@ -1,5 +1,5 @@
-#ifndef AUTO_ADS_PARSER_UTILS_H
-#define AUTO_ADS_PARSER_UTILS_H
+#ifndef AUTO_ADS_UTILS_H
+#define AUTO_ADS_UTILS_H
 
 #include <string>
 #include <regex>
@@ -41,4 +41,4 @@ namespace utils
     }
 }
 
-#endif //AUTO_ADS_PARSER_UTILS_H
+#endif //AUTO_ADS_UTILS_H

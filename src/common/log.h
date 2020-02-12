@@ -16,6 +16,6 @@ inline void initLogger()
     if(fs::exists(path))
         fs::create_directories(path);
 
-    logger = spdlog::rotating_logger_mt("async_file_logger", "log/log.log", 1024 * 1024 * 5, 3);
+    logger = spdlog::rotating_logger_mt("main", "log/log.log", 1024 * 1024 * 5, 3);
 }
 #endif //AUTO_ADS_PARSER_LOG_H

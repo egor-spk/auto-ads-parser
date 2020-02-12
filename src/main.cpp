@@ -1,12 +1,19 @@
+#include "common/log.h"
+#include "parser/include/IParser.h"
+#include "parser/include/WebSiteParser.h"
+#include "parser/include/CurlTransport.h"
+#include "parser/include/AutoruPageInfoParser.h"
+#include "parser/include/AvitoPageInfoParser.h"
+
 #include <iostream>
 #include <fmt/color.h>
 #include <fstream>
 #include <future>
-#include "include/AutoruParser.h"
-#include "include/AvitoParser.h"
-#include "include/log.h"
 
-void outputResult(std::shared_ptr<IParser> &parser, const std::string &filename);
+inline const auto autoruLink = "https://auto.ru/moskva/cars/hyundai/solaris/20922677/used/?catalog_equipment=front-centre-armrest&km_age_to=60000&owners_count_group=ONE&transmission=AUTOMATIC&sort=fresh_relevance_1-desc&output_type=list&page={}";
+inline const auto avitoLink = "https://www.avito.ru/moskva/avtomobili/s_probegom/hyundai/solaris/avtomat/odin_vladelec?cd=1&pmin=600000&radius=0&f=188_19775b0.1286_14765b0&p={}";
+
+void outputResult(std::shared_ptr<parser::IParser> &parser, const std::string &filename);
 
 int main() try
 {
@@ -14,8 +21,10 @@ int main() try
 
     auto autoru = std::async(std::launch::async, []()
     {
-        std::shared_ptr<IParser> parser = std::make_shared<AutoruParser>(
-                "https://auto.ru/moskva/cars/hyundai/solaris/20922677/used/?catalog_equipment=front-centre-armrest&km_age_to=60000&owners_count_group=ONE&transmission=AUTOMATIC&sort=fresh_relevance_1-desc&output_type=list&page={}");
+        using namespace parser;
+        std::shared_ptr<IParser> parser = std::make_shared<WebSiteParser>(std::make_unique<CurlTransport>(),
+                                                                          std::make_unique<AutoruPageInfoParser>(),
+                                                                          autoruLink);
         try
         {
             parser->parse();
@@ -29,8 +38,10 @@ int main() try
     });
     auto avito = std::async(std::launch::async, []()
     {
-        std::shared_ptr<IParser> parser = std::make_shared<AvitoParser>(
-                "https://www.avito.ru/moskva/avtomobili/s_probegom/hyundai/solaris/avtomat/odin_vladelec?cd=1&pmin=600000&radius=0&f=188_19775b0.1286_14765b0&p={}");
+        using namespace parser;
+        std::shared_ptr<IParser> parser = std::make_shared<WebSiteParser>(std::make_unique<CurlTransport>(),
+                                                                          std::make_unique<AvitoPageInfoParser>(),
+                                                                          avitoLink);
         try
         {
             parser->parse();
@@ -52,10 +63,10 @@ int main() try
        << "mileage" << std::endl;
 
 
-    std::vector<std::shared_ptr<IParser>> parsers{autoru.get(), avito.get()};
+    std::vector<std::shared_ptr<parser::IParser>> parsers{autoru.get(), avito.get()};
     for (const auto &parser : parsers)
     {
-        const auto &ads = parser->getAds();
+        const auto &ads = parser->getResult();
         for (const auto &ad : ads)
         {
             ss << ad.id << ","
@@ -75,7 +86,7 @@ int main() try
     std::cerr << fmt::format(fg(fmt::color::red), "Uncaught exception: {}", e.what());
 }
 
-void outputResult(std::shared_ptr<IParser> &parser, const std::string &filename)
+void outputResult(std::shared_ptr<parser::IParser> &parser, const std::string &filename)
 {
     std::stringstream ss;
     ss << "id" << ","
@@ -84,7 +95,7 @@ void outputResult(std::shared_ptr<IParser> &parser, const std::string &filename)
        << "year" << ","
        << "mileage" << std::endl;
 
-    const auto &ads = parser->getAds();
+    const auto &ads = parser->getResult();
     for (const auto &ad : ads)
     {
         ss << ad.id << ","
