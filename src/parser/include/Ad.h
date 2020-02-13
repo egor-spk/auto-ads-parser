@@ -1,6 +1,8 @@
 #ifndef AUTO_ADS_PARSER_AD_H
 #define AUTO_ADS_PARSER_AD_H
 
+#include <nlohmann/json.hpp>
+
 #include <string>
 #include <utility>
 #include <vector>
@@ -12,6 +14,13 @@ namespace parser
      */
     struct Ad
     {
+        static constexpr const char *IdField = "id";
+        static constexpr const char *LinkField = "link";
+        static constexpr const char *PriceField = "price";
+        static constexpr const char *YearField = "year";
+        static constexpr const char *MileageField = "mileage";
+        static constexpr const char *ImagesField = "images";
+
         Ad(std::string id,
            std::string link,
            uint32_t price,
@@ -39,6 +48,18 @@ namespace parser
         bool operator!=(const Ad &rhs) const
         {
             return !(rhs == *this);
+        }
+
+        operator nlohmann::json() const
+        {
+            return {
+                    {IdField,      id},
+                    {LinkField,    link},
+                    {PriceField,   price},
+                    {YearField,    year},
+                    {MileageField, mileage},
+                    {ImagesField,  images}
+            };
         }
     };
 }
