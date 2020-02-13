@@ -24,9 +24,10 @@ namespace parser
         CDocument doc;
         doc.parse(r);
         const size_t pageCount = pageParser_->getPageCount(doc);
+        LOG_DEBUG("Found {} pages", pageCount);
 
         // обрабатываем первую страницу и если есть другие, то проходим и по ним.
-        LOG_DEBUG("Start parse first page");
+        LOG_TRACE("Start parse first page");
         parsePageAds(doc);
 
         for (int page = 2; page <= pageCount; ++page)
@@ -34,7 +35,7 @@ namespace parser
             using namespace std::chrono_literals;
             std::this_thread::sleep_for(5s); // не наглеем
 
-            LOG_DEBUG("Start parse page {}", page);
+            LOG_TRACE("Start parse page {}", page);
             r = transport_->get(fmt::format(link_, page));
             doc.parse(r);
             parsePageAds(doc);
@@ -59,12 +60,14 @@ namespace parser
         // обходим объявления и извлекаем информацию
         for (int i = 0; i < adsCount; ++i)
         {
+            LOG_TRACE("Start parse ad {} ", i);
             std::string id;
             try
             {
                 auto ad = ads.nodeAt(i);
                 std::string link = pageParser_->getLink(ad);
                 id = pageParser_->getId(link);
+                LOG_DEBUG("Ad {} has id {}", i, id);
                 const uint32_t price = pageParser_->getPrice(ad);
                 const uint16_t year = pageParser_->getYear(ad);
                 const uint32_t mileage = pageParser_->getMileage(ad);

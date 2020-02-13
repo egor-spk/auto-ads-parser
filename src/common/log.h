@@ -1,7 +1,7 @@
 #ifndef AUTO_ADS_PARSER_LOG_H
 #define AUTO_ADS_PARSER_LOG_H
 
-#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_DEBUG
+#define SPDLOG_ACTIVE_LEVEL SPDLOG_LEVEL_TRACE
 
 #include <spdlog/sinks/rotating_file_sink.h>
 #include <spdlog/spdlog.h>
@@ -12,7 +12,7 @@ inline std::shared_ptr<spdlog::logger> logger;
 
 using LogLevel = spdlog::level::level_enum;
 
-inline void initLogger(LogLevel level = LogLevel::debug)
+inline void initLogger(LogLevel level = LogLevel::trace)
 {
     namespace fs = std::filesystem;
 
