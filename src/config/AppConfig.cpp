@@ -1,0 +1,69 @@
+#include "include/AppConfig.h"
+
+#include <nlohmann/json.hpp>
+
+namespace app_config
+{
+    AppConfig::AppConfig(std::istream &is)
+    {
+        try
+        {
+            if (!is.good())
+            {
+                throw AppConfigError("Input stream is invalid");
+            }
+
+            nlohmann::json jsConfig;
+            is >> jsConfig;
+
+            parseFields(jsConfig);
+        } catch (const nlohmann::json::exception &e)
+        {
+            throw AppConfigError(fmt::format("An error occurred while parsing the config: {}", e.what()));
+        }
+    }
+
+    void AppConfig::parseFields(const nlohmann::json &jsConfig)
+    {
+        // поля для парсинга
+        const char *AutoruField = "autoru";
+        const char *AvitoField = "avito";
+        const char *LogLevelField = "loglevel";
+
+        // ссылки
+        if (!jsConfig.contains(AutoruField) || jsConfig[AutoruField].empty())
+        {
+            throw AppConfigError("autoru field must be set");
+        }
+        autoruLink_ = jsConfig[AutoruField];
+
+        if (!jsConfig.contains(AvitoField) || jsConfig[AvitoField].empty())
+        {
+            throw AppConfigError("avito field must be set");
+        }
+        avitoLink_ = jsConfig[AvitoField];
+
+        // уровень лога
+        if (!jsConfig.contains(LogLevelField) || jsConfig[LogLevelField].empty())
+        {
+            throw AppConfigError("loglevel field must be set");
+        }
+        auto getLoglevel = [&]()
+        {
+            const std::unordered_map<std::string, LogLevel> levels = {
+                    {"trace",    LogLevel::trace},
+                    {"debug",    LogLevel::debug},
+                    {"info",     LogLevel::info},
+                    {"error",    LogLevel::err},
+                    {"warning",  LogLevel::warn},
+                    {"critical", LogLevel::critical},
+                    {"off",      LogLevel::off}
+            };
+            const auto level = jsConfig[LogLevelField];
+            if (levels.find(level) == levels.cend())
+                throw AppConfigError(fmt::format("Unknown log level: {}", level));
+            return levels.at(level);
+        };
+        level_ = getLoglevel();
+    }
+}

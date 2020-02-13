@@ -4,27 +4,44 @@
 #include "parser/include/CurlTransport.h"
 #include "parser/include/AutoruPageInfoParser.h"
 #include "parser/include/AvitoPageInfoParser.h"
+#include "config/include/AppConfig.h"
 
 #include <iostream>
 #include <fmt/color.h>
 #include <fstream>
 #include <future>
 
-inline const auto autoruLink = "https://auto.ru/moskva/cars/hyundai/solaris/20922677/used/?catalog_equipment=front-centre-armrest&km_age_to=60000&owners_count_group=ONE&transmission=AUTOMATIC&sort=fresh_relevance_1-desc&output_type=list&page={}";
-inline const auto avitoLink = "https://www.avito.ru/moskva/avtomobili/s_probegom/hyundai/solaris/avtomat/odin_vladelec?cd=1&pmin=600000&radius=0&f=188_19775b0.1286_14765b0&p={}";
-
 void outputResult(std::shared_ptr<parser::IParser> &parser, const std::string &filename);
 
-int main() try
+int main(int argc, char **argv) try
 {
-    initLogger();
+    // Проверяем единственный параметр - конфиг
+    if (argc < 2)
+    {
+        std::cerr << fmt::format(fg(fmt::color::red), "No path to config") << std::endl;
+        return EXIT_FAILURE;
+    }
+    const std::string path = argv[1];
+    if (!std::filesystem::exists(path))
+    {
+        std::cerr << fmt::format(fg(fmt::color::red), "Config does not found at path: {}", path) << std::endl;
+        return EXIT_FAILURE;
+    }
+    std::ifstream is(path);
+    app_config::AppConfig config(is);
+    is.close();
 
-    auto autoru = std::async(std::launch::async, []()
+    // инициализируем логгер
+    initLogger(config.getLogLevel());
+    LOG_DEBUG("App start with links: \nautoru - \"{}\"\navito - \"{}\"", config.getAutoruLink(), config.getAvitoLink());
+
+    // парсинг
+    auto autoru = std::async(std::launch::async, [&config]()
     {
         using namespace parser;
         std::shared_ptr<IParser> parser = std::make_shared<WebSiteParser>(std::make_unique<CurlTransport>(),
                                                                           std::make_unique<AutoruPageInfoParser>(),
-                                                                          autoruLink);
+                                                                          config.getAutoruLink());
         try
         {
             parser->parse();
@@ -36,12 +53,12 @@ int main() try
         }
         return std::move(parser);
     });
-    auto avito = std::async(std::launch::async, []()
+    auto avito = std::async(std::launch::async, [&config]()
     {
         using namespace parser;
         std::shared_ptr<IParser> parser = std::make_shared<WebSiteParser>(std::make_unique<CurlTransport>(),
                                                                           std::make_unique<AvitoPageInfoParser>(),
-                                                                          avitoLink);
+                                                                          config.getAvitoLink());
         try
         {
             parser->parse();
