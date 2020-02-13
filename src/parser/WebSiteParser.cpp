@@ -24,21 +24,23 @@ namespace parser
         CDocument doc;
         doc.parse(r);
         const size_t pageCount = pageParser_->getPageCount(doc);
-        LOG_DEBUG("Found {} pages", pageCount);
+        LOG_DEBUG("{}: found {} pages", pageParser_->name(), pageCount);
 
         // обрабатываем первую страницу и если есть другие, то проходим и по ним.
-        LOG_TRACE("Start parse first page");
+        LOG_TRACE("{}: start parse first page", pageParser_->name());
         parsePageAds(doc);
+        LOG_TRACE("{}: end parse first page", pageParser_->name());
 
         for (int page = 2; page <= pageCount; ++page)
         {
             using namespace std::chrono_literals;
             std::this_thread::sleep_for(5s); // не наглеем
 
-            LOG_TRACE("Start parse page {}", page);
+            LOG_TRACE("{}: start parse page {}", pageParser_->name(), page);
             r = transport_->get(fmt::format(link_, page));
             doc.parse(r);
             parsePageAds(doc);
+            LOG_TRACE("{}: end parse page {}", pageParser_->name(), page);
         }
     }
 
@@ -60,14 +62,14 @@ namespace parser
         // обходим объявления и извлекаем информацию
         for (int i = 0; i < adsCount; ++i)
         {
-            LOG_TRACE("Start parse ad {} ", i);
+            LOG_TRACE("{}: start parse ad {} ", pageParser_->name(), i);
             std::string id;
             try
             {
                 auto ad = ads.nodeAt(i);
                 std::string link = pageParser_->getLink(ad);
                 id = pageParser_->getId(link);
-                LOG_DEBUG("Ad {} has id {}", i, id);
+                LOG_DEBUG("{}: ad {} has id {}", pageParser_->name(), i, id);
                 const uint32_t price = pageParser_->getPrice(ad);
                 const uint16_t year = pageParser_->getYear(ad);
                 const uint32_t mileage = pageParser_->getMileage(ad);
@@ -79,12 +81,13 @@ namespace parser
                                                                 std::move(images));
                 if (!isSuccess)
                 {
-                    LOG_WARN("Ad {} already exist", id);
+                    LOG_WARN("{}: ad {} already exist", pageParser_->name(), id);
                 }
             } catch (const ParseError &e)
             {
-                LOG_WARN("Failed to fully parse ad {}: {}", (id.empty() ? "?" : id), e.what());
+                LOG_WARN("{}: failed to fully parse ad {}: {}", pageParser_->name(), (id.empty() ? "?" : id), e.what());
             }
+            LOG_TRACE("{}: end parse ad {} ", pageParser_->name(), i);
         }
     }
 }

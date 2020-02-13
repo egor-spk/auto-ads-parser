@@ -30,6 +30,8 @@ namespace parser
 
         virtual const char* singleAdBlockQuery() const noexcept = 0;
 
+        virtual const char* name() const noexcept = 0;
+
         virtual ~IWebPageInfoParser() = default;
     };
 }

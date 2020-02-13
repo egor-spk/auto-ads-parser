@@ -25,6 +25,8 @@ namespace parser
         const char *adsBlockQuery() const noexcept override { return "div.js-catalog_serp"; }
 
         const char *singleAdBlockQuery() const noexcept override { return "div.item-with-contact"; }
+
+        const char *name() const noexcept override { return "Avito"; }
     };
 }
 

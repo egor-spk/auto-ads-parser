@@ -25,6 +25,8 @@ namespace parser
         const char *adsBlockQuery() const noexcept override { return "div.ListingCars-module__list"; }
 
         const char *singleAdBlockQuery() const noexcept override { return "div.ListingCars-module__listingItem"; }
+
+        const char *name() const noexcept override { return "Autoru"; }
     };
 }
 
