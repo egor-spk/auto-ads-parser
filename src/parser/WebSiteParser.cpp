@@ -63,15 +63,17 @@ namespace parser
             try
             {
                 auto ad = ads.nodeAt(i);
-                const std::string link = pageParser_->getLink(ad);
+                std::string link = pageParser_->getLink(ad);
                 id = pageParser_->getId(link);
                 const uint32_t price = pageParser_->getPrice(ad);
                 const uint16_t year = pageParser_->getYear(ad);
                 const uint32_t mileage = pageParser_->getMileage(ad);
+                auto images = pageParser_->getImageLinks(ad);
 
                 // добавляем объявление
                 bool isSuccess;
-                std::tie(std::ignore, isSuccess) = ads_.emplace(id, link, price, year, mileage);
+                std::tie(std::ignore, isSuccess) = ads_.emplace(id, std::move(link), price, year, mileage,
+                                                                std::move(images));
                 if (!isSuccess)
                 {
                     logger->warn("Ad {} already exist", id);

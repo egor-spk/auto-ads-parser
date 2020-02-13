@@ -24,6 +24,8 @@ namespace parser
 
         virtual uint32_t getMileage(CNode &node) = 0;
 
+        virtual std::vector<std::string> getImageLinks(CNode &node) = 0;
+
         virtual const char* adsBlockQuery() const noexcept = 0;
 
         virtual const char* singleAdBlockQuery() const noexcept = 0;

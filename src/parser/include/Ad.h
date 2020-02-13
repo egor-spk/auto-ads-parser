@@ -3,6 +3,7 @@
 
 #include <string>
 #include <utility>
+#include <vector>
 
 namespace parser
 {
@@ -15,17 +16,20 @@ namespace parser
            std::string link,
            uint32_t price,
            uint16_t year,
-           uint32_t mileage) : id(std::move(id)),
-                               link(std::move(link)),
-                               price(price),
-                               year(year),
-                               mileage(mileage) {}
+           uint32_t mileage,
+           std::vector<std::string> images) : id(std::move(id)),
+                                              link(std::move(link)),
+                                              price(price),
+                                              year(year),
+                                              mileage(mileage),
+                                              images(std::move(images)) {}
 
         std::string id;
         std::string link;
         uint32_t price;
         uint16_t year;
         uint32_t mileage;
+        std::vector<std::string> images;
 
         bool operator==(const Ad &rhs) const
         {

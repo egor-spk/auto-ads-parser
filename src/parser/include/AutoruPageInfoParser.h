@@ -20,6 +20,8 @@ namespace parser
 
         uint32_t getMileage(CNode &node) override;
 
+        std::vector<std::string> getImageLinks(CNode &node) override;
+
         const char *adsBlockQuery() const noexcept override { return "div.ListingCars-module__list"; }
 
         const char *singleAdBlockQuery() const noexcept override { return "div.ListingCars-module__listingItem"; }

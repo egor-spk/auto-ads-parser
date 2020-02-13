@@ -102,4 +102,26 @@ namespace parser
             throw ParseError{e.what()};
         }
     }
+
+    std::vector<std::string> AvitoPageInfoParser::getImageLinks(CNode &node)
+    {
+        auto select = node.find("img.large-picture-img");
+        size_t imagesCount = select.nodeNum();
+        if (imagesCount == 0)
+            throw ParseError("Unable to find images");
+
+        std::vector<std::string> images;
+        images.reserve(imagesCount);
+
+        for (int i = 0; i < imagesCount; ++i)
+        {
+            std::string link = select.nodeAt(i).attribute("src");
+            if(link.find(".gif") != std::string::npos) // пропускаем gif
+                continue;
+
+            images.push_back(link);
+        }
+
+        return images;
+    }
 }

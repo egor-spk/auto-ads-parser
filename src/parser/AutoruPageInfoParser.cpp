@@ -89,4 +89,30 @@ namespace parser
             throw ParseError{e.what()};
         }
     }
+
+    std::vector<std::string> AutoruPageInfoParser::getImageLinks(CNode &node)
+    {
+        auto select = node.find("div.Brazzers__image-wrapper > div.Brazzers__image");
+        size_t imagesCount = select.nodeNum();
+        if (imagesCount == 0)
+            throw ParseError("Unable to find images");
+
+        std::vector<std::string> images;
+        images.reserve(imagesCount);
+
+        for (int i = 0; i < imagesCount; ++i)
+        {
+            auto link = select.nodeAt(i).attribute("data-src");
+
+            // в зависимости от источника фото добавляем по-разному
+            if(link.find("_crpd") != std::string::npos)
+            {
+                images.push_back("https://auto.ru" + link);
+            } else {
+                images.push_back("https:" + link);
+            }
+        }
+
+        return images;
+    }
 }
