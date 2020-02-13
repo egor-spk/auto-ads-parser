@@ -28,11 +28,11 @@ int main() try
         try
         {
             parser->parse();
-            logger->info("Autoru: successfully parse {} ads", parser->countResult());
+            LOG_INFO("Autoru: successfully parse {} ads", parser->countResult());
             outputResult(parser, "autoru.csv");
         } catch (const ParseError &e)
         {
-            logger->error("Autoru parsing error: {}", e.what());
+            LOG_ERROR("Autoru parsing error: {}", e.what());
         }
         return std::move(parser);
     });
@@ -45,11 +45,11 @@ int main() try
         try
         {
             parser->parse();
-            logger->info("Avito: successfully parse {} ads", parser->countResult());
+            LOG_INFO("Avito: successfully parse {} ads", parser->countResult());
             outputResult(parser, "avito.csv");
         } catch (const ParseError &e)
         {
-            logger->error("Avito parsing error: {}", e.what());
+            LOG_ERROR("Avito parsing error: {}", e.what());
         }
         return std::move(parser);
     });
@@ -83,7 +83,14 @@ int main() try
     return EXIT_SUCCESS;
 } catch (const std::exception &e)
 {
-    std::cerr << fmt::format(fg(fmt::color::red), "Uncaught exception: {}", e.what());
+    const auto message = fmt::format("Uncaught exception: {}", e.what());
+    if (logger)
+    {
+        LOG_CRITICAL(message);
+    } else
+    {
+        std::cerr << fmt::format(fg(fmt::color::red), message);
+    }
 }
 
 void outputResult(std::shared_ptr<parser::IParser> &parser, const std::string &filename)

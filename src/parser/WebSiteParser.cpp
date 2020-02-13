@@ -26,7 +26,7 @@ namespace parser
         const size_t pageCount = pageParser_->getPageCount(doc);
 
         // обрабатываем первую страницу и если есть другие, то проходим и по ним.
-        logger->debug("Start parse first page");
+        LOG_DEBUG("Start parse first page");
         parsePageAds(doc);
 
         for (int page = 2; page <= pageCount; ++page)
@@ -34,7 +34,7 @@ namespace parser
             using namespace std::chrono_literals;
             std::this_thread::sleep_for(5s); // не наглеем
 
-            logger->debug("Start parse page {}", page);
+            LOG_DEBUG("Start parse page {}", page);
             r = transport_->get(fmt::format(link_, page));
             doc.parse(r);
             parsePageAds(doc);
@@ -76,11 +76,11 @@ namespace parser
                                                                 std::move(images));
                 if (!isSuccess)
                 {
-                    logger->warn("Ad {} already exist", id);
+                    LOG_WARN("Ad {} already exist", id);
                 }
             } catch (const ParseError &e)
             {
-                logger->warn("Failed to fully parse ad {}: {}", (id.empty() ? "?" : id), e.what());
+                LOG_WARN("Failed to fully parse ad {}: {}", (id.empty() ? "?" : id), e.what());
             }
         }
     }
