@@ -20,6 +20,8 @@ namespace parser
     void WebSiteParser::parse()
     {
         // открываем первую страницу и определяем общее количество страниц
+        if(!isWork)
+            return;
         auto r = transport_->get(fmt::format(link_, 1));
         CDocument doc;
         doc.parse(r);
@@ -27,14 +29,19 @@ namespace parser
         LOG_DEBUG("{}: found {} pages", pageParser_->name(), pageCount);
 
         // обрабатываем первую страницу и если есть другие, то проходим и по ним.
+        if(!isWork)
+            return;
         LOG_TRACE("{}: start parse first page", pageParser_->name());
         parsePageAds(doc);
         LOG_TRACE("{}: end parse first page", pageParser_->name());
 
-        for (int page = 2; page <= pageCount; ++page)
+        for (int page = 2; page <= pageCount && isWork; ++page)
         {
             using namespace std::chrono_literals;
-            std::this_thread::sleep_for(5s); // не наглеем
+            LOG_DEBUG("{}: wait 5s before parse page {}", pageParser_->name(), page);
+            std::unique_lock<std::mutex> lock{waitMutex_};
+            if(waitCv_.wait_for(lock, 5s, [this](){ return !isWork;}))
+                return;
 
             LOG_TRACE("{}: start parse page {}", pageParser_->name(), page);
             r = transport_->get(fmt::format(link_, page));
@@ -60,7 +67,7 @@ namespace parser
         ads_.reserve(adsCount);
 
         // обходим объявления и извлекаем информацию
-        for (int i = 0; i < adsCount; ++i)
+        for (int i = 0; i < adsCount && isWork; ++i)
         {
             LOG_TRACE("{}: start parse ad {} ", pageParser_->name(), i);
             std::string id;
@@ -89,5 +96,15 @@ namespace parser
             }
             LOG_TRACE("{}: end parse ad {} ", pageParser_->name(), i);
         }
+    }
+
+    void WebSiteParser::stop() noexcept
+    {
+        LOG_DEBUG("Parser has been stopped");
+        {
+            std::lock_guard<std::mutex> _{waitMutex_};
+            isWork = false;
+        }
+        waitCv_.notify_one();
     }
 }

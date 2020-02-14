@@ -21,6 +21,8 @@ namespace parser
 
         virtual void clean() noexcept = 0;
 
+        virtual void stop() noexcept = 0;
+
         virtual ~IParser() = default;
     };
 

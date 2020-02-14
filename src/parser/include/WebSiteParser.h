@@ -7,6 +7,9 @@
 
 #include <memory>
 #include <unordered_set>
+#include <atomic>
+#include <mutex>
+#include <condition_variable>
 
 namespace parser
 {
@@ -28,9 +31,14 @@ namespace parser
 
         void clean() noexcept override { ads_.clear(); }
 
+        void stop() noexcept override;
+
     private:
         void parsePageAds(CDocument &document);
 
+        std::atomic_bool isWork{true};
+        std::mutex waitMutex_;
+        std::condition_variable waitCv_;
         std::unique_ptr<IWebSiteTransport> transport_;
         std::unique_ptr<IWebPageInfoParser> pageParser_;
         std::string link_;
