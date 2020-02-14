@@ -158,7 +158,7 @@ void Application::startParsing() noexcept
             LOG_DEBUG("Waiting {} hours for next parsing", timeout.count());
             logger->flush();
             std::unique_lock<std::mutex> lock{waitMutex_};
-            if (waitCv_.wait_for(lock, std::chrono::minutes(1), [&] { return !isWork; }))
+            if (waitCv_.wait_for(lock, std::chrono::hours(6), [&] { return !isWork; }))
             {
                 LOG_DEBUG("Parser thread woke up from a signal");
             } else
