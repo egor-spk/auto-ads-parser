@@ -21,7 +21,7 @@ inline void initLogger(LogLevel level = LogLevel::trace)
     if (fs::exists(path))
         fs::create_directories(path);
 
-    logger = spdlog::create_async_nb<spdlog::sinks::rotating_file_sink_mt>("main", "log/log.log", 1024 * 1024 * 5, 3);
+    logger = spdlog::create_async<spdlog::sinks::rotating_file_sink_mt>("main", "log/log.log", 1024 * 1024 * 5, 3);
     logger->set_pattern("%d-%m-%Y %H:%M:%S.%e [%t] [%l] [%s:%#] %v");
     logger->set_level(level);
 }
