@@ -12,6 +12,8 @@ FetchContent_GetProperties(${NAME})
 string(TOLOWER ${NAME} lcName)
 if (NOT ${lcName}_POPULATED)
     FetchContent_Populate(${NAME})
+    
+    set(SPDLOG_FMT_EXTERNAL ON CACHE INTERNAL "")
 
     add_subdirectory(${${lcName}_SOURCE_DIR} ${${lcName}_BINARY_DIR} EXCLUDE_FROM_ALL)
 endif ()
