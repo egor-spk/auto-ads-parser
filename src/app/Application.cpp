@@ -147,12 +147,12 @@ void Application::startParsing() noexcept
 
     while (isWork)
     {
+        using namespace std::chrono_literals;
         LOG_TRACE("Start parsing");
 
         try
         {
             using namespace parser;
-            using namespace std::chrono_literals;
             ParserRunner<AvitoPageInfoParser> avitoParser{"Avito", config_.getAvitoLink()};
             ParserRunner<AutoruPageInfoParser> autoruParser{"Autoru", config_.getAutoruLink()};
             {
@@ -207,7 +207,7 @@ void Application::startParsing() noexcept
             LOG_DEBUG("Waiting {} hours for next parsing", timeout.count());
             logger->flush();
             std::unique_lock<std::mutex> lock{waitMutex_};
-            if (waitCv_.wait_for(lock, std::chrono::hours(6), [&] { return !isWork; }))
+            if (waitCv_.wait_for(lock, 6h, [&] { return !isWork; }))
             {
                 LOG_DEBUG("Parser thread woke up from a signal");
             } else
