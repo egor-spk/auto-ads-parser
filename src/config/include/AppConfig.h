@@ -24,6 +24,8 @@ namespace app_config
 
         LogLevel getLogLevel() const noexcept override { return level_; }
 
+        const std::string &getLogPath() const noexcept override { return logPath_; }
+
     private:
         void parseFields(const nlohmann::json &jsConfig);
 
@@ -32,6 +34,7 @@ namespace app_config
         LogLevel level_;
         uint16_t port_;
         std::string apiKey_;
+        std::string logPath_;
     };
 }
 

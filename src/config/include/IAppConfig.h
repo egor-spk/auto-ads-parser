@@ -21,6 +21,8 @@ namespace app_config
 
         virtual LogLevel getLogLevel() const noexcept = 0;
 
+        virtual const std::string &getLogPath() const noexcept = 0;
+
         virtual ~IAppConfig() = default;
     };
 

@@ -31,6 +31,7 @@ namespace app_config
         const char *LogLevelField = "loglevel";
         const char *PortField = "port";
         const char *ApiKeyField = "api_key";
+        const char *LogPathField = "log_path";
 
         // ссылки
         if (!jsConfig.contains(AutoruField) || jsConfig[AutoruField].empty())
@@ -58,6 +59,13 @@ namespace app_config
             throw AppConfigError("api_key field must be set");
         }
         apiKey_ = jsConfig[ApiKeyField];
+
+        // путь до лога
+        if (!jsConfig.contains(LogPathField) || jsConfig[LogPathField].empty())
+        {
+            throw AppConfigError("log_path field must be set");
+        }
+        logPath_ = jsConfig[LogPathField];
 
         // уровень лога
         if (!jsConfig.contains(LogLevelField) || jsConfig[LogLevelField].empty())

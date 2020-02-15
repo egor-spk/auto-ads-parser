@@ -76,7 +76,7 @@ Application::Application(app_config::IAppConfig &config) :
         config_(config)
 {
     // инициализируем логгер
-    initLogger(config.getLogLevel());
+    initLogger(config.getLogPath(), config.getLogLevel());
     LOG_INFO("App start with links: \nautoru - \"{}\"\navito - \"{}\"", config.getAutoruLink(),
              config.getAvitoLink());
 }

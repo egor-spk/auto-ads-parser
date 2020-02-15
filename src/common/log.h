@@ -12,14 +12,18 @@ inline std::shared_ptr<spdlog::logger> logger;
 
 using LogLevel = spdlog::level::level_enum;
 
-inline void initLogger(LogLevel level = LogLevel::trace)
+/**
+ * @brief Инициализация логгера
+ * @param logPath путь до папки с логом
+ * @param level минимальный уровень логгирования
+ */
+inline void initLogger(const std::string &logPath, LogLevel level = LogLevel::trace)
 {
     namespace fs = std::filesystem;
 
     // если нет папки для логов, то создаем ее
-    const fs::path path = "log/";
-    if (fs::exists(path))
-        fs::create_directories(path);
+    if (fs::exists(logPath))
+        fs::create_directories(logPath);
 
     logger = spdlog::create_async<spdlog::sinks::rotating_file_sink_mt>("main", "log/log.log", 1024 * 1024 * 5, 3);
     logger->set_pattern("%d-%m-%Y %H:%M:%S.%e [%t] [%l] [%s:%#] %v");
