@@ -29,6 +29,8 @@ namespace app_config
         const char *AutoruField = "autoru";
         const char *AvitoField = "avito";
         const char *LogLevelField = "loglevel";
+        const char *PortField = "port";
+        const char *ApiKeyField = "api_key";
 
         // ссылки
         if (!jsConfig.contains(AutoruField) || jsConfig[AutoruField].empty())
@@ -42,6 +44,20 @@ namespace app_config
             throw AppConfigError("avito field must be set");
         }
         avitoLink_ = jsConfig[AvitoField];
+
+        // порт
+        if (!jsConfig.contains(PortField) || jsConfig[PortField].empty())
+        {
+            throw AppConfigError("port field must be set");
+        }
+        port_ = jsConfig[PortField].get<uint16_t>();
+
+        // api key
+        if (!jsConfig.contains(ApiKeyField) || jsConfig[ApiKeyField].empty())
+        {
+            throw AppConfigError("api_key field must be set");
+        }
+        apiKey_ = jsConfig[ApiKeyField];
 
         // уровень лога
         if (!jsConfig.contains(LogLevelField) || jsConfig[LogLevelField].empty())
@@ -59,7 +75,7 @@ namespace app_config
                     {"critical", LogLevel::critical},
                     {"off",      LogLevel::off}
             };
-            const auto level = jsConfig[LogLevelField];
+            const auto level = jsConfig[LogLevelField].get<std::string>();
             if (levels.find(level) == levels.cend())
                 throw AppConfigError(fmt::format("Unknown log level: {}", level));
             return levels.at(level);

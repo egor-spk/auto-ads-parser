@@ -18,6 +18,10 @@ namespace app_config
 
         const std::string &getAvitoLink() const noexcept override { return avitoLink_; }
 
+        uint16_t getPort() const noexcept override { return port_; }
+
+        const std::string &getApiKey() const noexcept override { return apiKey_; }
+
         LogLevel getLogLevel() const noexcept override { return level_; }
 
     private:
@@ -26,6 +30,8 @@ namespace app_config
         std::string autoruLink_;
         std::string avitoLink_;
         LogLevel level_;
+        uint16_t port_;
+        std::string apiKey_;
     };
 }
 

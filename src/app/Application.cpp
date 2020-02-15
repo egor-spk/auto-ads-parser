@@ -8,6 +8,14 @@
 #include "include/SignalHandler.h"
 
 #include <future>
+#include <restinio/all.hpp>
+#include <restinio/transforms/zlib.hpp>
+
+using router_t = restinio::router::express_router_t<>;
+using server_traits_t = restinio::traits_t<
+        restinio::asio_timer_manager_t,
+        restinio::null_logger_t,
+        router_t>;
 
 namespace
 {
@@ -85,6 +93,38 @@ int Application::run()
     // запускаем поток парсинга
     parserThr_ = std::make_unique<std::thread>(&Application::startParsing, this);
 
+    // запускаем http сервер
+    auto router = std::make_unique<router_t>();
+    router->http_get("/v1/:api_key/ad", [this](auto req, auto params)
+    {
+        // проверяем apikey
+        static const auto configApiKey = config_.getApiKey();
+        const auto apiKey = restinio::cast_to<std::string>(params["api_key"]);
+        if (configApiKey != apiKey)
+            req->create_response(restinio::status_forbidden())
+                    .done();
+
+        std::lock_guard<std::mutex> _{cacheMutex_};
+        auto resp = req->create_response()
+                .append_header(restinio::http_field::content_type, "application/json; charset=utf-8")
+                .set_body(gzipAds_);
+        auto ba = restinio::transforms::zlib::gzip_body_appender(resp);
+        return resp.done();
+    });
+    restinio::http_server_t<server_traits_t> server{
+            restinio::own_io_context(),
+            [&config = config_, &router](auto &settings)
+            {
+                settings.port(config.getPort());
+                settings.address("0.0.0.0");
+                settings.request_handler(std::move(router));
+            }};
+    restinio::on_pool_runner_t<restinio::http_server_t<server_traits_t>> runner{
+            1,
+            server
+    };
+    runner.start();
+
     // ожидаем сигнал от системы
     try
     {
@@ -125,11 +165,13 @@ void Application::startParsing() noexcept
             std::lock_guard<std::mutex> _{cacheMutex_};
 
             // достаем результаты autoru
+            bool isChange{false};
             LOG_TRACE("Get autoru parsing result");
             auto autoruRes = autoru.get();
             if (!autoruRes.empty())
             {
                 cache_[AutoruCacheField] = std::move(autoruRes);
+                isChange = true;
             } else
             {
                 LOG_WARN("Autoru parser return empty result");
@@ -141,9 +183,16 @@ void Application::startParsing() noexcept
             if (!avitoRes.empty())
             {
                 cache_[AvitoCacheField] = std::move(avitoRes);
+                isChange = true;
             } else
             {
                 LOG_WARN("Avito parser return empty result");
+            }
+
+            // сжимаем результат
+            if (isChange)
+            {
+                gzipAds_ = restinio::transforms::zlib::gzip_compress(cache_.dump(), 9);
             }
         } catch (const std::exception &e)
         {
@@ -153,7 +202,7 @@ void Application::startParsing() noexcept
         LOG_TRACE("End parsing");
 
         // ждем следующего раза
-        if(isWork)
+        if (isWork)
         {
             LOG_DEBUG("Waiting {} hours for next parsing", timeout.count());
             logger->flush();

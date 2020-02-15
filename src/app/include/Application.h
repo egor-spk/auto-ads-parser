@@ -33,6 +33,7 @@ private:
     // кеш результатов парсинга
     std::mutex cacheMutex_;
     nlohmann::json cache_;
+    std::string gzipAds_;
 
     // парсинг
     std::unique_ptr<std::thread> parserThr_;

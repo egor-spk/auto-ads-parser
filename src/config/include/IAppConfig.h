@@ -15,6 +15,10 @@ namespace app_config
 
         virtual const std::string &getAvitoLink() const noexcept = 0;
 
+        virtual uint16_t getPort() const noexcept = 0;
+
+        virtual const std::string &getApiKey() const noexcept = 0;
+
         virtual LogLevel getLogLevel() const noexcept = 0;
 
         virtual ~IAppConfig() = default;

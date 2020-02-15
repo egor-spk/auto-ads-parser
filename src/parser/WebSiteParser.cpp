@@ -20,7 +20,7 @@ namespace parser
     void WebSiteParser::parse()
     {
         // открываем первую страницу и определяем общее количество страниц
-        if(!isWork)
+        if (!isWork)
             return;
         auto r = transport_->get(fmt::format(link_, 1));
         CDocument doc;
@@ -29,7 +29,7 @@ namespace parser
         LOG_DEBUG("{}: found {} pages", pageParser_->name(), pageCount);
 
         // обрабатываем первую страницу и если есть другие, то проходим и по ним.
-        if(!isWork)
+        if (!isWork)
             return;
         LOG_TRACE("{}: start parse first page", pageParser_->name());
         parsePageAds(doc);
@@ -40,7 +40,7 @@ namespace parser
             using namespace std::chrono_literals;
             LOG_DEBUG("{}: wait 5s before parse page {}", pageParser_->name(), page);
             std::unique_lock<std::mutex> lock{waitMutex_};
-            if(waitCv_.wait_for(lock, 5s, [this](){ return !isWork;}))
+            if (waitCv_.wait_for(lock, 5s, [this]() { return !isWork; }))
                 return;
 
             LOG_TRACE("{}: start parse page {}", pageParser_->name(), page);
@@ -100,7 +100,7 @@ namespace parser
 
     void WebSiteParser::stop() noexcept
     {
-        LOG_DEBUG("Parser has been stopped");
+        LOG_DEBUG("{}: parser has been stopped", pageParser_->name());
         {
             std::lock_guard<std::mutex> _{waitMutex_};
             isWork = false;
