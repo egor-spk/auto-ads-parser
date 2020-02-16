@@ -1,0 +1,105 @@
+<template>
+  <q-layout view="lHh Lpr lFf">
+    <q-header elevated>
+      <q-toolbar>
+        <q-btn
+          flat
+          dense
+          round
+          @click="leftDrawerOpen = !leftDrawerOpen"
+          icon="menu"
+          aria-label="Menu"
+        />
+
+        <q-toolbar-title>Объявления</q-toolbar-title>
+
+        <q-btn
+          flat
+          dense
+          round
+          @click="onFullScreen"
+          :icon="isFullscreen ? 'fullscreen_exit' : 'fullscreen'"
+          aria-label="Fullscreen"
+        />
+      </q-toolbar>
+    </q-header>
+
+    <q-drawer v-model="leftDrawerOpen" show-if-above>
+      <q-img class="absolute-top" src="~assets/drawer-background.png" style="height: 150px">
+        <div class="absolute-bottom bg-transparent">
+          <q-avatar size="56px" class="q-mb-sm">
+            <img src="statics/app-logo-128x128.png" />
+          </q-avatar>
+          <div class="text-weight-bold">Auto ads</div>
+        </div>
+      </q-img>
+
+      <q-scroll-area
+        style="height: calc(100% - 150px); margin-top: 150px; border-right: 1px solid #ddd"
+      >
+        <q-list padding>
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="inbox" />
+            </q-item-section>
+
+            <q-item-section>Inbox</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple>
+            <q-item-section avatar>
+              <q-icon name="star" />
+            </q-item-section>
+
+            <q-item-section>Star</q-item-section>
+          </q-item>
+        </q-list>
+      </q-scroll-area>
+    </q-drawer>
+
+    <q-page-container>
+      <router-view />
+    </q-page-container>
+  </q-layout>
+</template>
+
+<script>
+export default {
+  name: 'MainLayout',
+  data () {
+    return {
+      leftDrawerOpen: false,
+      isFullscreen: false
+    }
+  },
+  methods: {
+    onFullScreen () {
+      if (this.isFullscreen) {
+        window.AndroidFullScreen.showSystemUI(
+          () => {
+            this.isFullscreen = false
+          },
+          error => {
+            this.$q.notify({
+              color: 'negative',
+              message: error.message
+            })
+          }
+        )
+      } else {
+        window.AndroidFullScreen.immersiveMode(
+          () => {
+            this.isFullscreen = true
+          },
+          error => {
+            this.$q.notify({
+              color: 'negative',
+              message: error.message
+            })
+          }
+        )
+      }
+    }
+  }
+}
+</script>
