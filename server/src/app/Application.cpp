@@ -162,14 +162,13 @@ void Application::startParsing() noexcept
             auto autoru = std::async(std::launch::async, std::move(autoruParser));
             auto avito = std::async(std::launch::async, std::move(avitoParser));
 
-            std::lock_guard<std::mutex> _{cacheMutex_};
-
-            // достаем результаты autoru
+            // достаем результаты
             bool isChange{false};
             LOG_TRACE("Get autoru parsing result");
             auto autoruRes = autoru.get();
             if (!autoruRes.empty())
             {
+                std::lock_guard<std::mutex> _{cacheMutex_};
                 cache_[AutoruCacheField] = std::move(autoruRes);
                 isChange = true;
             } else
@@ -182,6 +181,7 @@ void Application::startParsing() noexcept
             auto avitoRes = avito.get();
             if (!avitoRes.empty())
             {
+                std::lock_guard<std::mutex> _{cacheMutex_};
                 cache_[AvitoCacheField] = std::move(avitoRes);
                 isChange = true;
             } else
@@ -192,6 +192,7 @@ void Application::startParsing() noexcept
             // сжимаем результат
             if (isChange)
             {
+                std::lock_guard<std::mutex> _{cacheMutex_};
                 gzipAds_ = restinio::transforms::zlib::gzip_compress(cache_.dump(), 9);
             }
         } catch (const std::exception &e)
