@@ -64,6 +64,8 @@
 </template>
 
 <script>
+import { notifyError } from '../helpers/notify'
+
 export default {
   name: 'MainLayout',
   data () {
@@ -74,30 +76,28 @@ export default {
   },
   methods: {
     onFullScreen () {
-      if (this.isFullscreen) {
-        window.AndroidFullScreen.showSystemUI(
-          () => {
-            this.isFullscreen = false
-          },
-          error => {
-            this.$q.notify({
-              color: 'negative',
-              message: error.message
-            })
-          }
-        )
+      if (this.$q.platform.is.cordova) {
+        if (this.isFullscreen) {
+          window.AndroidFullScreen.showSystemUI(
+            () => {
+              this.isFullscreen = false
+            },
+            error => {
+              notifyError(error.message)
+            }
+          )
+        } else {
+          window.AndroidFullScreen.immersiveMode(
+            () => {
+              this.isFullscreen = true
+            },
+            error => {
+              notifyError(error.message)
+            }
+          )
+        }
       } else {
-        window.AndroidFullScreen.immersiveMode(
-          () => {
-            this.isFullscreen = true
-          },
-          error => {
-            this.$q.notify({
-              color: 'negative',
-              message: error.message
-            })
-          }
-        )
+        notifyError('This feature only works for cordova android app')
       }
     }
   }
