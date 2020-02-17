@@ -9,7 +9,9 @@
   "private": true,
   "scripts": {
     "lint": "eslint --ext .js,.vue src",
-    "android-dev": "quasar dev -m android"
+    "android-dev": "quasar dev -m android",
+    "android-build": "quasar build -m android",
+    "dev": "quasar dev -m spa"
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",

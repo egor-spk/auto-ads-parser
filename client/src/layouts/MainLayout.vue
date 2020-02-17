@@ -11,7 +11,7 @@
           aria-label="Menu"
         />
 
-        <q-toolbar-title>Объявления</q-toolbar-title>
+        <q-toolbar-title>{{$route.meta.title}}</q-toolbar-title>
 
         <q-btn
           flat
@@ -28,7 +28,7 @@
       <q-img class="absolute-top" src="~assets/drawer-background.png" style="height: 150px">
         <div class="absolute-bottom bg-transparent">
           <q-avatar size="56px" class="q-mb-sm">
-            <img src="statics/app-logo-128x128.png" />
+            <img src="~assets/app-logo-128x128.png"/>
           </q-avatar>
           <div class="text-weight-bold">Auto ads</div>
         </div>
@@ -38,27 +38,37 @@
         style="height: calc(100% - 150px); margin-top: 150px; border-right: 1px solid #ddd"
       >
         <q-list padding>
-          <q-item clickable v-ripple>
+          <q-item clickable v-ripple to="/ads">
             <q-item-section avatar>
-              <q-icon name="inbox" />
+              <q-icon name="list_alt"/>
             </q-item-section>
 
-            <q-item-section>Inbox</q-item-section>
+            <q-item-section>Объявления</q-item-section>
           </q-item>
 
-          <q-item clickable v-ripple>
+          <q-item clickable v-ripple to="/charts">
             <q-item-section avatar>
-              <q-icon name="star" />
+              <q-icon name="bar_chart"/>
             </q-item-section>
 
-            <q-item-section>Star</q-item-section>
+            <q-item-section>Графики</q-item-section>
+          </q-item>
+
+          <q-separator/>
+
+          <q-item clickable v-ripple to="/settings">
+            <q-item-section avatar>
+              <q-icon name="settings"/>
+            </q-item-section>
+
+            <q-item-section>Настройки</q-item-section>
           </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
 
     <q-page-container>
-      <router-view />
+      <router-view/>
     </q-page-container>
   </q-layout>
 </template>
