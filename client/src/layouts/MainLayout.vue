@@ -68,13 +68,16 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view/>
+      <q-pull-to-refresh :disable="$route.path === '/settings'" @refresh="refreshAds">
+        <router-view/>
+      </q-pull-to-refresh>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
 import { notifyError } from '../helpers/notify'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'MainLayout',
@@ -85,6 +88,7 @@ export default {
     }
   },
   methods: {
+    ...mapActions(['fetchAds']),
     onFullScreen () {
       if (this.$q.platform.is.cordova) {
         if (this.isFullscreen) {
@@ -109,6 +113,10 @@ export default {
       } else {
         notifyError('This feature only works for cordova android app')
       }
+    },
+    async refreshAds (done) {
+      await this.fetchAds()
+      done()
     }
   }
 }
