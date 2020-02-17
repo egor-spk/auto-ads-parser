@@ -45,11 +45,11 @@ namespace parser
 
     uint32_t AvitoPageInfoParser::getPrice(CNode &node)
     {
-        auto select = node.find("div.about span");
-        if (select.nodeNum() < 2)
+        auto select = node.find(".snippet-price");
+        if (select.nodeNum() == 0)
             throw ParseError("Unable to find price");
 
-        auto rawPrice = select.nodeAt(1).text();
+        auto rawPrice = select.nodeAt(0).text();
         if (rawPrice.empty())
             throw ParseError("Found price is empty");
 
