@@ -10,7 +10,9 @@ export default function () {
     strict: process.env.DEV,
     state: {
       ads: {},
-      settings: {}
+      settings: {},
+      favorite: [],
+      ignore: []
     },
     mutations: {
       setAds (state, ads) {
@@ -19,6 +21,50 @@ export default function () {
       setSettings (state, settings) {
         LocalStorage.set('address', settings.address)
         state.settings = settings
+      },
+      addFavorite (state, id) {
+        const arr = state.favorite
+        const index = arr.indexOf(id)
+        if (index === -1) {
+          arr.push(id)
+          state.favorite = arr
+          LocalStorage.set('favorite', JSON.stringify(state.favorite))
+        }
+      },
+      addIgnore (state, id) {
+        const arr = state.ignore
+        const index = arr.indexOf(id)
+        if (index === -1) {
+          arr.push(id)
+          state.ignore = arr
+          LocalStorage.set('ignore', JSON.stringify(state.ignore))
+        }
+      },
+      removeFromFavorite (state, id) {
+        const arr = state.favorite
+        const index = arr.indexOf(id)
+        if (index > -1) {
+          arr.splice(index, 1)
+          state.favorite = arr
+          LocalStorage.set('favorite', JSON.stringify(state.favorite))
+        }
+      },
+      removeFromIgnore (state, id) {
+        const arr = state.ignore
+        const index = arr.indexOf(id)
+        if (index > -1) {
+          arr.splice(index, 1)
+          state.ignore = arr
+          LocalStorage.set('favorite', JSON.stringify(state.ignore))
+        }
+      },
+      setFavorite (state, favorite) {
+        state.favorite = JSON.parse(favorite)
+        LocalStorage.set('favorite', favorite)
+      },
+      setIgnore (state, ignore) {
+        state.ignore = JSON.parse(ignore)
+        LocalStorage.set('ignore', ignore)
       }
     },
     actions: {
@@ -32,6 +78,18 @@ export default function () {
         }
 
         commit('setSettings', settings)
+      },
+      fetchFavorite ({ commit }) {
+        const favorite = LocalStorage.getItem('favorite')
+        if (favorite !== null) {
+          commit('setFavorite', favorite)
+        }
+      },
+      fetchIgnore ({ commit }) {
+        const ignore = LocalStorage.getItem('ignore')
+        if (ignore !== null) {
+          commit('setIgnore', ignore)
+        }
       },
       async fetchAds ({ commit, state }) {
         if (state.settings.address) {
@@ -49,26 +107,68 @@ export default function () {
       },
       async fetchData ({ dispatch }) {
         await dispatch('fetchSettings')
+        await dispatch('fetchIgnore')
+        await dispatch('fetchFavorite')
         await dispatch('fetchAds')
       }
     },
     getters: {
       autoRuAds (state, getters) {
         if ('autoru' in state.ads) {
-          return state.ads.autoru
+          return state.ads.autoru.filter(ad => !state.ignore.includes(ad.id))
         }
 
         return []
       },
       avitoAds (state, getters) {
         if ('avito' in state.ads) {
-          return state.ads.avito
+          return state.ads.avito.filter(ad => !state.ignore.includes(ad.id))
         }
 
         return []
       },
       ads (state, getters) {
         return [...getters.autoRuAds, ...getters.avitoAds]
+      },
+      favorite (state) {
+        let autoru = []
+        let avito = []
+
+        if ('autoru' in state.ads) {
+          autoru = state.ads.autoru.filter(ad => state.favorite.includes(ad.id)).map(ad => {
+            ad.type = 'auto.ru'
+            return ad
+          })
+        }
+
+        if ('avito' in state.ads) {
+          avito = state.ads.avito.filter(ad => state.favorite.includes(ad.id)).map(ad => {
+            ad.type = 'avito'
+            return ad
+          })
+        }
+
+        return [...autoru, ...avito]
+      },
+      ignore (state) {
+        let autoru = []
+        let avito = []
+
+        if ('autoru' in state.ads) {
+          autoru = state.ads.autoru.filter(ad => state.ignore.includes(ad.id)).map(ad => {
+            ad.type = 'auto.ru'
+            return ad
+          })
+        }
+
+        if ('avito' in state.ads) {
+          avito = state.ads.avito.filter(ad => state.ignore.includes(ad.id)).map(ad => {
+            ad.type = 'avito'
+            return ad
+          })
+        }
+
+        return [...autoru, ...avito]
       }
     }
   })

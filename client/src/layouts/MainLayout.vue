@@ -48,6 +48,22 @@
             <q-item-section>Объявления</q-item-section>
           </q-item>
 
+          <q-item clickable v-ripple to="/favorite">
+            <q-item-section avatar>
+              <q-icon name="favorite"/>
+            </q-item-section>
+
+            <q-item-section>Избранное</q-item-section>
+          </q-item>
+
+          <q-item clickable v-ripple to="/ignore">
+            <q-item-section avatar>
+              <q-icon name="thumb_down"/>
+            </q-item-section>
+
+            <q-item-section>Скрытые</q-item-section>
+          </q-item>
+
           <q-item clickable v-ripple to="/charts">
             <q-item-section avatar>
               <q-icon name="bar_chart"/>
