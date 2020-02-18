@@ -19,12 +19,12 @@ namespace parser
     /**
      * @brief Ошибка получения данных
      */
-    class WebSiteTransport : public std::exception
+    class WebSiteTransportError : public std::exception
     {
     public:
-        explicit WebSiteTransport(const char *msg) : msg_{msg} {}
+        explicit WebSiteTransportError(const char *msg) : msg_{msg} {}
 
-        explicit WebSiteTransport(std::string msg) : msg_{std::move(msg)} {}
+        explicit WebSiteTransportError(std::string msg) : msg_{std::move(msg)} {}
 
         const char *what() const noexcept override { return msg_.c_str(); }
 

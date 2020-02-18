@@ -22,9 +22,9 @@ namespace parser
 
         std::vector<std::string> getImageLinks(CNode &node) override;
 
-        const char *adsBlockQuery() const noexcept override { return "div.ListingCars-module__list"; }
+        const char *adsBlockQuery() const noexcept override { return "div.ListingCars-module__container"; }
 
-        const char *singleAdBlockQuery() const noexcept override { return "div.ListingCars-module__listingItem"; }
+        const char *singleAdBlockQuery() const noexcept override { return "div.ListingItem-module__container"; }
 
         const char *name() const noexcept override { return "Autoru"; }
     };

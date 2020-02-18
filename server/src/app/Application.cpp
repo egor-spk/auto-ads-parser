@@ -36,6 +36,15 @@ namespace
                                                                 std::make_unique<T>(),
                                                                 link_)} {}
 
+        ParserRunner(std::string name,
+                     std::string link,
+                     const std::unordered_map<std::string, std::string> &cookie) :
+                name_{std::move(name)},
+                link_{std::move(link)},
+                parser_{std::make_shared<parser::WebSiteParser>(std::make_unique<parser::CurlTransport>(cookie),
+                                                                std::make_unique<T>(),
+                                                                link_)} {}
+
         nlohmann::json operator()()
         {
             try
@@ -54,9 +63,14 @@ namespace
                     std::transform(res.cbegin(), res.cend(), std::back_inserter(jsRes), [](auto &&ad) { return ad; });
                     return jsRes;
                 }
-            } catch (const parser::ParseError &e)
+            }
+            catch (const parser::ParseError &e)
             {
                 LOG_ERROR("{} parsing error: {}", name_, e.what());
+            }
+            catch (const parser::WebSiteTransportError &e)
+            {
+                LOG_ERROR("{} fetch error: {}", name_, e.what());
             }
 
             return {};
@@ -154,7 +168,8 @@ void Application::startParsing() noexcept
         {
             using namespace parser;
             ParserRunner<AvitoPageInfoParser> avitoParser{"Avito", config_.getAvitoLink()};
-            ParserRunner<AutoruPageInfoParser> autoruParser{"Autoru", config_.getAutoruLink()};
+            ParserRunner<AutoruPageInfoParser> autoruParser{"Autoru", config_.getAutoruLink(),
+                                                            {{"autoru_gdpr", "1"}}};
             {
                 std::lock_guard<std::mutex> _{waitMutex_};
                 parsers_ = {avitoParser.getParser(), autoruParser.getParser()};
