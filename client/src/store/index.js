@@ -9,12 +9,12 @@ export default function () {
   const Store = new Vuex.Store({
     strict: process.env.DEV,
     state: {
-      ads: [],
+      ads: {},
       settings: {}
     },
     mutations: {
       setAds (state, ads) {
-        state.settings = ads
+        state.ads = ads
       },
       setSettings (state, settings) {
         LocalStorage.set('address', settings.address)
@@ -50,6 +50,25 @@ export default function () {
       async fetchData ({ dispatch }) {
         await dispatch('fetchSettings')
         await dispatch('fetchAds')
+      }
+    },
+    getters: {
+      autoRuAds (state, getters) {
+        if ('autoru' in state.ads) {
+          return state.ads.autoru
+        }
+
+        return []
+      },
+      avitoAds (state, getters) {
+        if ('avito' in state.ads) {
+          return state.ads.avito
+        }
+
+        return []
+      },
+      ads (state, getters) {
+        return [...getters.autoRuAds, ...getters.avitoAds]
       }
     }
   })
