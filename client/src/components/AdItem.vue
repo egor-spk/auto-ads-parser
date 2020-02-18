@@ -1,28 +1,17 @@
 <template>
   <q-item class="card">
     <q-item-section thumbnail class="images">
-      <q-carousel
-        class="images-carousel"
-        transition-prev="slide-right"
-        transition-next="slide-left"
-        animated
-        v-model="slide"
-        infinite
-        navigation
-        swipeable>
-
-        <q-carousel-slide class="image" v-for="(item, index) in ad.images" :key="index" :name="index" :img-src="item"/>
-
-      </q-carousel>
+      <q-img :src="ad.images[0]"/>
     </q-item-section>
-    <q-item-section class="description">
-      <p>Пробег: {{ad.mileage}}</p>
-      <p>Год: {{ad.year}}</p>
-      <p>Цена: {{ad.price}}</p>
-      <p class="buttons row justify-end">
-        <q-btn round outline color="primary" @click="favorite(ad.id)" icon="favorite_border"/>
-        <q-btn round outline color="primary" @click="open(ad.link)" icon="open_in_new"/>
-      </p>
+    <q-item-section top no-wrap class="description column">
+      <div>Пробег: {{ad.mileage}}</div>
+      <div>Год: {{ad.year}}</div>
+      <div>Цена: {{ad.price}}</div>
+      <div class="buttons row justify-between">
+        <q-btn round outline color="negative" size="sm" @click="ignore(ad.id)" icon="thumb_down"/>
+        <q-btn round outline color="positive" size="sm" @click="favorite(ad.id)" icon="favorite_border"/>
+        <q-btn round outline color="primary" size="sm" @click="open(ad.link)" icon="open_in_new"/>
+      </div>
     </q-item-section>
   </q-item>
 </template>
@@ -44,6 +33,9 @@ export default {
     favorite (id) {
       notifyError('Not implemented')
     },
+    ignore (id) {
+      notifyError('Not implemented')
+    },
     open (link) {
       window.open(link, '_system')
     }
@@ -53,34 +45,16 @@ export default {
 
 <style lang="scss" scoped>
   .card {
-    height: 170px;
+    height: 150px;
     padding: 8px 0 8px 16px;
   }
 
+  .buttons {
+    margin-top: auto;
+  }
+
   .images {
-    width: 50%;
-  }
-
-  .images-carousel {
-    width: 100%;
-  }
-
-  .image {
-    width: 100%;
-  }
-
-  .description {
-    > .buttons {
-      margin-bottom: 0;
-    }
-
-    .q-btn {
-      margin: 0 10px 0 10px;
-    }
-
-    .q-btn:last-child {
-      margin: 0 0 0 5px;
-    }
+    width: 65%;
   }
 </style>
 

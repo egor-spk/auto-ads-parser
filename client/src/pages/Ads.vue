@@ -11,7 +11,8 @@
     </q-tabs>
     <q-tab-panels
       v-model="tab"
-      animated
+      keep-alive
+      swipeable
     >
       <q-tab-panel name="all">
           <AdList :ads="ads"/>

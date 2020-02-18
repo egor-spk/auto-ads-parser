@@ -1,7 +1,7 @@
 <template>
   <q-virtual-scroll
     :items="ads"
-    :virtual-scroll-item-size="170"
+    :virtual-scroll-item-size="150"
     :virtual-scroll-sticky-size-start="50"
     separator
   >
