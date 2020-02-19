@@ -29,7 +29,7 @@ export default {
   },
   computed: {
     ...mapGetters(['ads', 'avitoAds', 'autoRuAds']),
-    itemsSrc () {
+    items () {
       switch (this.itemsType) {
         case 'avito':
           return this.avitoAds
@@ -38,9 +38,6 @@ export default {
         default:
           return this.ads
       }
-    },
-    items () {
-      return this.itemsSrc
     }
   }
 }
