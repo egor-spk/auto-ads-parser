@@ -3,6 +3,7 @@
     :items="ads"
     :virtual-scroll-item-size="150"
     :virtual-scroll-sticky-size-start="50"
+    :virtual-scroll-slice-size="15"
     separator
   >
     <template v-slot="{ item, index }">
@@ -22,10 +23,3 @@ export default {
   }
 }
 </script>
-
-<style scoped>
-  .q-virtual-scroll {
-    height: 100%;
-    padding: 15px;
-  }
-</style>

@@ -9,7 +9,7 @@
       <div>Год: {{ad.year}}</div>
       <div>Цена: {{ad.price}}</div>
       <div class="buttons row justify-between">
-        <q-btn round outline color="negative" size="sm" @click="remove(ad.id)" icon="remove" />
+        <q-btn :ripple="false" round outline color="negative" size="sm" @click="onRemove(ad.id)" icon="remove" />
         <q-btn round outline color="primary" size="sm" @click="open(ad.link)" icon="open_in_new" />
       </div>
     </q-item-section>
@@ -18,37 +18,22 @@
 
 <script>
 
+import { mapMutations } from 'vuex'
+
 export default {
   name: 'AdItemSpecial',
   props: {
     ad: Object,
-    remove: Function
+    type: String
   },
   methods: {
+    ...mapMutations(['removeFrom']),
+    onRemove (id) {
+      this.removeFrom({ id: id, type: this.type })
+    },
     open (link) {
       window.open(link, '_system')
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.card {
-  height: 150px;
-  padding: 8px 0 8px 16px;
-}
-
-.buttons {
-  margin-top: auto;
-}
-
-.images {
-  width: 65%;
-}
-</style>
-
-<style>
-.images-carousel > .q-carousel__navigation--bottom {
-  bottom: 0;
-}
-</style>

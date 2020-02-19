@@ -1,11 +1,11 @@
 <template>
   <q-page>
-    <AdListSpecial :ads="favorite" :remove="removeFromFavorite"/>
+    <AdListSpecial :ads="favorite" :type="'favorite'"/>
   </q-page>
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex'
+import { mapGetters } from 'vuex'
 import AdListSpecial from '../components/AdListSpecial'
 
 export default {
@@ -13,9 +13,6 @@ export default {
   components: { AdListSpecial },
   computed: {
     ...mapGetters(['favorite'])
-  },
-  methods: {
-    ...mapMutations(['removeFromFavorite'])
   }
 }
 </script>

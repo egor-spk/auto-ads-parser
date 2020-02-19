@@ -6,7 +6,7 @@
     separator
   >
     <template v-slot="{ item, index }">
-     <AdItemSpecial :key="index" :ad="item" :remove="remove"/>
+     <AdItemSpecial :key="index" :ad="item" :type="type"/>
     </template>
   </q-virtual-scroll>
 </template>
@@ -19,14 +19,7 @@ export default {
   components: { AdItemSpecial },
   props: {
     ads: Array,
-    remove: Function
+    type: String
   }
 }
 </script>
-
-<style scoped>
-  .q-virtual-scroll {
-    height: 100%;
-    padding: 15px;
-  }
-</style>

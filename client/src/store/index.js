@@ -40,22 +40,23 @@ export default function () {
           LocalStorage.set('ignore', JSON.stringify(state.ignore))
         }
       },
-      removeFromFavorite (state, id) {
-        const arr = state.favorite
-        const index = arr.indexOf(id)
-        if (index > -1) {
-          arr.splice(index, 1)
-          state.favorite = arr
-          LocalStorage.set('favorite', JSON.stringify(state.favorite))
+      removeFrom (state, payload) {
+        let arr = []
+        if (payload.type === 'favorite') {
+          arr = state.favorite
+        } else {
+          arr = state.ignore
         }
-      },
-      removeFromIgnore (state, id) {
-        const arr = state.ignore
-        const index = arr.indexOf(id)
+        const index = arr.indexOf(payload.id)
         if (index > -1) {
           arr.splice(index, 1)
-          state.ignore = arr
-          LocalStorage.set('favorite', JSON.stringify(state.ignore))
+          if (payload.type === 'favorite') {
+            state.favorite = arr
+            LocalStorage.set('favorite', JSON.stringify(state.favorite))
+          } else {
+            state.ignore = arr
+            LocalStorage.set('ignore', JSON.stringify(state.ignore))
+          }
         }
       },
       setFavorite (state, favorite) {

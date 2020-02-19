@@ -1,8 +1,6 @@
 <template>
   <q-page>
-    <q-pull-to-refresh @refresh="refreshAds">
-      <AdList :ads="items"/>
-    </q-pull-to-refresh>
+    <AdList :ads="items"/>
 
     <q-page-sticky position="bottom-right" :offset="[12, 12]">
       <q-fab direction="up" icon="list" color="primary">
@@ -18,7 +16,7 @@
 </template>
 
 <script>
-import { mapActions, mapGetters } from 'vuex'
+import { mapGetters } from 'vuex'
 import AdList from '../components/AdList'
 
 export default {
@@ -27,13 +25,6 @@ export default {
   data () {
     return {
       itemsType: 'all'
-    }
-  },
-  methods: {
-    ...mapActions(['fetchAds']),
-    async refreshAds (done) {
-      await this.fetchAds()
-      done()
     }
   },
   computed: {

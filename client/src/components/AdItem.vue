@@ -8,7 +8,7 @@
       <div>Год: {{ad.year}}</div>
       <div>Цена: {{ad.price}}</div>
       <div class="buttons row justify-between">
-        <q-btn round outline color="negative" size="sm" @click="onIgnore(ad.id)" icon="thumb_down" />
+        <q-btn :ripple="false" round outline color="negative" size="sm" @click="onIgnore(ad.id)" icon="thumb_down" />
         <q-btn
           round
           outline
@@ -40,10 +40,10 @@ export default {
     ...mapState(['favorite'])
   },
   methods: {
-    ...mapMutations(['addFavorite', 'removeFromFavorite', 'addIgnore']),
+    ...mapMutations(['addFavorite', 'removeFrom', 'addIgnore']),
     onFavorite (id) {
       if (this.favorite.includes(id)) {
-        this.removeFromFavorite(id)
+        this.removeFrom({ id: id, type: 'favorite' })
       } else {
         this.addFavorite(id)
       }
@@ -57,24 +57,3 @@ export default {
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.card {
-  height: 150px;
-  padding: 8px 0 8px 16px;
-}
-
-.buttons {
-  margin-top: auto;
-}
-
-.images {
-  width: 65%;
-}
-</style>
-
-<style>
-.images-carousel > .q-carousel__navigation--bottom {
-  bottom: 0;
-}
-</style>

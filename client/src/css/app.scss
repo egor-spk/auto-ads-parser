@@ -1,1 +1,19 @@
-// app global css in SCSS form
+.q-virtual-scroll {
+  height: calc(100vh - 50px);
+  padding: 15px;
+}
+
+.card {
+  height: 150px;
+  padding: 8px 0 8px 16px;
+
+  .buttons {
+    margin-top: auto;
+  }
+
+  .images {
+    width: 65%;
+  }
+}
+
+

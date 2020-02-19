@@ -1,28 +1,30 @@
 <template>
   <q-layout view="lHh Lpr lFf">
-    <q-header elevated>
-      <q-toolbar>
-        <q-btn
-          flat
-          dense
-          round
-          @click="leftDrawerOpen = !leftDrawerOpen"
-          icon="menu"
-          aria-label="Menu"
-        />
+    <q-pull-to-refresh :disable="$route.path === '/settings'" @refresh="refreshAds">
+      <q-header elevated>
+        <q-toolbar>
+          <q-btn
+            flat
+            dense
+            round
+            @click="leftDrawerOpen = !leftDrawerOpen"
+            icon="menu"
+            aria-label="Menu"
+          />
 
-        <q-toolbar-title>{{$route.meta.title}}</q-toolbar-title>
+          <q-toolbar-title>{{$route.meta.title}}</q-toolbar-title>
 
-        <q-btn
-          flat
-          dense
-          round
-          @click="onFullScreen"
-          :icon="isFullscreen ? 'fullscreen_exit' : 'fullscreen'"
-          aria-label="Fullscreen"
-        />
-      </q-toolbar>
-    </q-header>
+          <q-btn
+            flat
+            dense
+            round
+            @click="onFullScreen"
+            :icon="isFullscreen ? 'fullscreen_exit' : 'fullscreen'"
+            aria-label="Fullscreen"
+          />
+        </q-toolbar>
+      </q-header>
+    </q-pull-to-refresh>
 
     <q-drawer v-model="leftDrawerOpen" show-if-above>
       <q-img class="absolute-top" src="~assets/drawer-background.png" style="height: 150px">
@@ -84,13 +86,14 @@
     </q-drawer>
 
     <q-page-container>
-      <router-view/>
+        <router-view/>
     </q-page-container>
   </q-layout>
 </template>
 
 <script>
 import { notifyError } from '../helpers/notify'
+import { mapActions } from 'vuex'
 
 export default {
   name: 'MainLayout',
@@ -125,6 +128,11 @@ export default {
       } else {
         notifyError('This feature only works for cordova android app')
       }
+    },
+    ...mapActions(['fetchAds']),
+    async refreshAds (done) {
+      await this.fetchAds()
+      done()
     }
   }
 }
