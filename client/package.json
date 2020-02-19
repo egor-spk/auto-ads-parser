@@ -15,7 +15,9 @@
   },
   "dependencies": {
     "@quasar/extras": "^1.0.0",
-    "quasar": "^1.0.0"
+    "apexcharts": "^3.15.6",
+    "quasar": "^1.0.0",
+    "vue-apexcharts": "^1.5.2"
   },
   "devDependencies": {
     "@quasar/app": "^1.0.0",
