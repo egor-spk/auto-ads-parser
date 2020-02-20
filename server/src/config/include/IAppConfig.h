@@ -11,9 +11,9 @@ namespace app_config
      */
     struct IAppConfig
     {
-        virtual const std::string &getAutoruLink() const noexcept = 0;
+        virtual const std::optional<std::string> &getAutoruLink() const noexcept = 0;
 
-        virtual const std::string &getAvitoLink() const noexcept = 0;
+        virtual const std::optional<std::string> &getAvitoLink() const noexcept = 0;
 
         virtual uint16_t getPort() const noexcept = 0;
 

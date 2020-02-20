@@ -14,9 +14,9 @@ namespace app_config
     public:
         explicit AppConfig(std::istream &is);
 
-        const std::string &getAutoruLink() const noexcept override { return autoruLink_; }
+        const std::optional<std::string> &getAutoruLink() const noexcept override { return autoruLink_; }
 
-        const std::string &getAvitoLink() const noexcept override { return avitoLink_; }
+        const std::optional<std::string> &getAvitoLink() const noexcept override { return avitoLink_; }
 
         uint16_t getPort() const noexcept override { return port_; }
 
@@ -29,8 +29,8 @@ namespace app_config
     private:
         void parseFields(const nlohmann::json &jsConfig);
 
-        std::string autoruLink_;
-        std::string avitoLink_;
+        std::optional<std::string> autoruLink_;
+        std::optional<std::string> avitoLink_;
         LogLevel level_;
         uint16_t port_;
         std::string apiKey_;

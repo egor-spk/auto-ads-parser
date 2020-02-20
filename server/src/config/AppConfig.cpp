@@ -34,17 +34,14 @@ namespace app_config
         const char *LogPathField = "log_path";
 
         // ссылки
-        if (!jsConfig.contains(AutoruField) || jsConfig[AutoruField].empty())
+        if (jsConfig.contains(AutoruField) && !jsConfig[AutoruField].empty())
         {
-            throw AppConfigError("autoru field must be set");
+            autoruLink_ = jsConfig[AutoruField];
         }
-        autoruLink_ = jsConfig[AutoruField];
-
-        if (!jsConfig.contains(AvitoField) || jsConfig[AvitoField].empty())
+        if (jsConfig.contains(AvitoField) && !jsConfig[AvitoField].empty())
         {
-            throw AppConfigError("avito field must be set");
+            avitoLink_ = jsConfig[AvitoField];
         }
-        avitoLink_ = jsConfig[AvitoField];
 
         // порт
         if (!jsConfig.contains(PortField) || jsConfig[PortField].empty())

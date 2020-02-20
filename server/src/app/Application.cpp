@@ -91,8 +91,11 @@ Application::Application(app_config::IAppConfig &config) :
 {
     // инициализируем логгер
     initLogger(config.getLogPath(), config.getLogLevel());
-    LOG_INFO("App start with links: \nautoru - \"{}\"\navito - \"{}\"", config.getAutoruLink(),
-             config.getAvitoLink());
+    const auto &autoruLink = config.getAutoruLink();
+    const auto &avitoLink = config.getAvitoLink();
+    LOG_INFO("App start with links: {}{}",
+             autoruLink ? fmt::format("\nautoru - \"{}\"", *autoruLink) : "",
+             avitoLink ? fmt::format("\navito - \"{}\"", *avitoLink) : "");
 }
 
 Application::~Application()
@@ -138,6 +141,7 @@ int Application::run()
             server
     };
     runner.start();
+    LOG_INFO("HTTP server started");
 
     // ожидаем сигнал от системы
     try
@@ -159,6 +163,16 @@ void Application::startParsing() noexcept
 {
     LOG_TRACE("Start parser thread");
 
+    // нужно ли запускать функцию парсинга?
+    using namespace parser;
+    const auto &avitoLink = config_.getAvitoLink();
+    const auto &autoruLink = config_.getAutoruLink();
+    if (!avitoLink && !autoruLink)
+    {
+        LOG_INFO("No parsing links specified. Parsing function is disabled");
+        return;
+    }
+
     while (isWork)
     {
         using namespace std::chrono_literals;
@@ -166,42 +180,61 @@ void Application::startParsing() noexcept
 
         try
         {
-            using namespace parser;
-            ParserRunner<AvitoPageInfoParser> avitoParser{"Avito", config_.getAvitoLink()};
-            ParserRunner<AutoruPageInfoParser> autoruParser{"Autoru", config_.getAutoruLink(),
-                                                            {{"autoru_gdpr", "1"}}};
+            std::future<nlohmann::json> avito, autoru;
             {
                 std::lock_guard<std::mutex> _{waitMutex_};
-                parsers_ = {avitoParser.getParser(), autoruParser.getParser()};
+                // парсер avito
+                if (avitoLink)
+                {
+                    ParserRunner<AvitoPageInfoParser> avitoParser{"Avito", *avitoLink};
+                    parsers_.push_back(avitoParser.getParser());
+                    avito = std::async(std::launch::async, std::move(avitoParser));
+                    LOG_DEBUG("Start avito parser thread");
+                }
+
+                // парсер autoru
+                if (autoruLink)
+                {
+
+                    ParserRunner<AutoruPageInfoParser> autoruParser{"Autoru", *autoruLink,
+                                                                    {{"autoru_gdpr", "1"}}};
+                    parsers_.push_back(autoruParser.getParser());
+                    autoru = std::async(std::launch::async, std::move(autoruParser));
+                    LOG_DEBUG("Start autoru parser thread");
+                }
             }
-            auto autoru = std::async(std::launch::async, std::move(autoruParser));
-            auto avito = std::async(std::launch::async, std::move(avitoParser));
 
             // достаем результаты
             bool isChange{false};
-            LOG_TRACE("Get autoru parsing result");
-            auto autoruRes = autoru.get();
-            if (!autoruRes.empty())
+            if (autoru.valid())
             {
-                std::lock_guard<std::mutex> _{cacheMutex_};
-                cache_[AutoruCacheField] = std::move(autoruRes);
-                isChange = true;
-            } else
-            {
-                LOG_WARN("Autoru parser return empty result");
+                LOG_TRACE("Get autoru parsing result");
+                auto autoruRes = autoru.get();
+                if (!autoruRes.empty())
+                {
+                    std::lock_guard<std::mutex> _{cacheMutex_};
+                    cache_[AutoruCacheField] = std::move(autoruRes);
+                    isChange = true;
+                } else
+                {
+                    LOG_WARN("Autoru parser return empty result");
+                }
             }
 
             // достаем результаты авито
-            LOG_TRACE("Get avito parsing result");
-            auto avitoRes = avito.get();
-            if (!avitoRes.empty())
+            if (avito.valid())
             {
-                std::lock_guard<std::mutex> _{cacheMutex_};
-                cache_[AvitoCacheField] = std::move(avitoRes);
-                isChange = true;
-            } else
-            {
-                LOG_WARN("Avito parser return empty result");
+                LOG_TRACE("Get avito parsing result");
+                auto avitoRes = avito.get();
+                if (!avitoRes.empty())
+                {
+                    std::lock_guard<std::mutex> _{cacheMutex_};
+                    cache_[AvitoCacheField] = std::move(avitoRes);
+                    isChange = true;
+                } else
+                {
+                    LOG_WARN("Avito parser return empty result");
+                }
             }
 
             // сжимаем результат
