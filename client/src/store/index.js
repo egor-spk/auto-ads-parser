@@ -170,6 +170,18 @@ export default function () {
         }
 
         return [...autoru, ...avito]
+      },
+      avitoDateTime (state) {
+        if ('avito' in state.ads) {
+          return state.ads.avito.date_time
+        }
+        return undefined
+      },
+      autoRuDateTime (state) {
+        if ('autoru' in state.ads) {
+          return state.ads.autoru.date_time
+        }
+        return undefined
       }
     }
   })

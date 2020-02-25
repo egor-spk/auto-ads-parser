@@ -9,7 +9,8 @@ const routes = [
       { path: 'charts', component: () => import('pages/Charts.vue'), meta: { title: 'Графики' } },
       { path: 'settings', component: () => import('pages/Settings.vue'), meta: { title: 'Настройки' } },
       { path: 'favorite', component: () => import('pages/Favorite.vue'), meta: { title: 'Избранное' } },
-      { path: 'ignore', component: () => import('pages/Ignore.vue'), meta: { title: 'Скрытые' } }
+      { path: 'ignore', component: () => import('pages/Ignore.vue'), meta: { title: 'Скрытые' } },
+      { path: 'about', component: () => import('pages/About.vue'), meta: { title: 'О программе' } }
     ]
   }
 ]

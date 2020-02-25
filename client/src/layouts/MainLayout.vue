@@ -81,6 +81,14 @@
 
             <q-item-section>Настройки</q-item-section>
           </q-item>
+
+          <q-item clickable v-ripple to="/about">
+            <q-item-section avatar>
+              <q-icon name="info"/>
+            </q-item-section>
+
+            <q-item-section>О программе</q-item-section>
+          </q-item>
         </q-list>
       </q-scroll-area>
     </q-drawer>
