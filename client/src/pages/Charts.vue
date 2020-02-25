@@ -30,6 +30,7 @@ export default {
       itemsType: 'all',
       height: this.isPortait() ? '90%' : '200%',
       isRender: true,
+      min: 0,
       options: {
         chart: {
           toolbar: {
@@ -46,7 +47,9 @@ export default {
           tickAmount: this.isPortait() ? 10 : 20,
           title: {
             text: 'Пробег, км'
-          }
+          },
+          min: min => this.min,
+          max: max => this.max
         },
         tooltip: {
           x: {
@@ -76,6 +79,15 @@ export default {
           break
         default:
           source = this.ads
+      }
+
+      // находим минимальный пробег
+      if (source.length) {
+        const sortedAds = [...source].sort((a, b) => (a.mileage > b.mileage) ? 1 : ((b.mileage > a.mileage) ? -1 : 0))
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.min = sortedAds[0].mileage
+        // eslint-disable-next-line vue/no-side-effects-in-computed-properties
+        this.max = sortedAds[sortedAds.length - 1].mileage
       }
 
       // разделяем обычные точки и избранные
