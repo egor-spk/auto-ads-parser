@@ -1,40 +1,40 @@
-#include "include/AutoruPageInfoParser.h"
+#include "include/AvitoPageInfoParser.h"
 #include "include/IParser.h"
-#include "../common/utils.h"
+#include "../include/utils.h"
 
 #include <regex>
 
 namespace parser
 {
-    size_t AutoruPageInfoParser::getPageCount(CDocument &doc)
+    size_t AvitoPageInfoParser::getPageCount(CDocument &doc)
     {
-        auto select = doc.find("span.ListingPagination-module__pages");
+        auto select = doc.find("div.pagination-root-2oCjZ");
         if (select.nodeNum() == 0)
             return 1;
 
         // выбираем последнию кнопку
         auto node = select.nodeAt(0);
-        select = node.childAt(node.childNum() - 1).find("span.Button__text");
+        select = node.childAt(node.childNum() - 2).find("span.pagination-item-1WyVp");
         if (select.nodeNum() == 0)
             throw ParseError("Unable to find count page tag");
 
         return std::stoi(select.nodeAt(0).text());
     }
 
-    std::string AutoruPageInfoParser::getLink(CNode &node)
+    std::string AvitoPageInfoParser::getLink(CNode &node)
     {
-        auto select = node.find("a.ListingItemTitle-module__link");
+        auto select = node.find("a.snippet-link");
         if (select.nodeNum() == 0)
             throw ParseError("Unable to find link");
         auto link = select.nodeAt(0).attribute("href");
         if (link.empty())
             throw ParseError("Found link is empty");
-        return link;
+        return "https://avito.ru" + link;
     }
 
-    std::string AutoruPageInfoParser::getId(const std::string &link)
+    std::string AvitoPageInfoParser::getId(const std::string &link)
     {
-        static std::regex reg("\\d{10}-\\w{8}", std::regex::ECMAScript);
+        static std::regex reg("\\w+\\_+.+", std::regex::ECMAScript);
         std::smatch match;
         std::regex_search(link, match, reg);
         if (match.empty() || match.size() > 1)
@@ -43,11 +43,12 @@ namespace parser
         return match[0].str();
     }
 
-    uint32_t AutoruPageInfoParser::getPrice(CNode &node)
+    uint32_t AvitoPageInfoParser::getPrice(CNode &node)
     {
-        auto select = node.find("div.ListingItemPrice-module__content");
+        auto select = node.find(".snippet-price-row > span");
         if (select.nodeNum() == 0)
             throw ParseError("Unable to find price");
+
         auto rawPrice = select.nodeAt(0).text();
         if (rawPrice.empty())
             throw ParseError("Found price is empty");
@@ -61,25 +62,37 @@ namespace parser
         }
     }
 
-    uint16_t AutoruPageInfoParser::getYear(CNode &node)
+    uint16_t AvitoPageInfoParser::getYear(CNode &node)
     {
-        auto select = node.find("div.ListingItem-module__year");
+        auto select = node.find("a.snippet-link");
         if (select.nodeNum() == 0)
             throw ParseError("Unable to find year");
-        auto year = select.nodeAt(0).text();
-        if (year.empty())
+        auto rawYear = select.nodeAt(0).text();
+        if (rawYear.empty())
             throw ParseError("Found year is empty");
-        return std::stoi(year);
+
+        try
+        {
+            return utils::getDecimalFromStr(rawYear);
+        } catch (const std::invalid_argument &e)
+        {
+            throw ParseError{e.what()};
+        }
     }
 
-    uint32_t AutoruPageInfoParser::getMileage(CNode &node)
+    uint32_t AvitoPageInfoParser::getMileage(CNode &node)
     {
-        auto select = node.find("div.ListingItem-module__kmAge");
+        auto select = node.find("div.specific-params");
         if (select.nodeNum() == 0)
             throw ParseError("Unable to find mileage");
         auto rawMileage = select.nodeAt(0).text();
         if (rawMileage.empty())
             throw ParseError("Found mileage is empty");
+
+        const auto pos = rawMileage.find("км");
+        if (pos == std::string::npos)
+            throw ParseError("Unable to parse mileage");
+        rawMileage.erase(pos);
 
         try
         {
@@ -90,9 +103,9 @@ namespace parser
         }
     }
 
-    std::vector<std::string> AutoruPageInfoParser::getImageLinks(CNode &node)
+    std::vector<std::string> AvitoPageInfoParser::getImageLinks(CNode &node)
     {
-        auto select = node.find("div.Brazzers__image-wrapper > div.Brazzers__image");
+        auto select = node.find("img.large-picture-img");
         size_t imagesCount = select.nodeNum();
         if (imagesCount == 0)
             throw ParseError("Unable to find images");
@@ -102,15 +115,11 @@ namespace parser
 
         for (int i = 0; i < imagesCount; ++i)
         {
-            auto link = select.nodeAt(i).attribute("data-src");
+            std::string link = select.nodeAt(i).attribute("src");
+            if(link.find(".gif") != std::string::npos) // пропускаем gif
+                continue;
 
-            // в зависимости от источника фото добавляем по-разному
-            if(link.find("_crpd") != std::string::npos)
-            {
-                images.push_back("https://auto.ru" + link);
-            } else {
-                images.push_back("https:" + link);
-            }
+            images.push_back(link);
         }
 
         return images;

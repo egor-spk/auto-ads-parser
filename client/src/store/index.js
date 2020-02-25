@@ -116,14 +116,14 @@ export default function () {
     getters: {
       autoRuAds (state, getters) {
         if ('autoru' in state.ads) {
-          return state.ads.autoru.filter(ad => !state.ignore.includes(ad.id))
+          return state.ads.autoru.items.filter(ad => !state.ignore.includes(ad.id))
         }
 
         return []
       },
       avitoAds (state, getters) {
         if ('avito' in state.ads) {
-          return state.ads.avito.filter(ad => !state.ignore.includes(ad.id))
+          return state.ads.avito.items.filter(ad => !state.ignore.includes(ad.id))
         }
 
         return []
@@ -136,14 +136,14 @@ export default function () {
         let avito = []
 
         if ('autoru' in state.ads) {
-          autoru = state.ads.autoru.filter(ad => state.favorite.includes(ad.id)).map(ad => {
+          autoru = state.ads.autoru.items.filter(ad => state.favorite.includes(ad.id)).map(ad => {
             ad.type = 'auto.ru'
             return ad
           })
         }
 
         if ('avito' in state.ads) {
-          avito = state.ads.avito.filter(ad => state.favorite.includes(ad.id)).map(ad => {
+          avito = state.ads.avito.items.filter(ad => state.favorite.includes(ad.id)).map(ad => {
             ad.type = 'avito'
             return ad
           })
@@ -156,14 +156,14 @@ export default function () {
         let avito = []
 
         if ('autoru' in state.ads) {
-          autoru = state.ads.autoru.filter(ad => state.ignore.includes(ad.id)).map(ad => {
+          autoru = state.ads.autoru.items.filter(ad => state.ignore.includes(ad.id)).map(ad => {
             ad.type = 'auto.ru'
             return ad
           })
         }
 
         if ('avito' in state.ads) {
-          avito = state.ads.avito.filter(ad => state.ignore.includes(ad.id)).map(ad => {
+          avito = state.ads.avito.items.filter(ad => state.ignore.includes(ad.id)).map(ad => {
             ad.type = 'avito'
             return ad
           })

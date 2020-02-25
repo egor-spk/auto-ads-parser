@@ -1,5 +1,5 @@
 #include "include/WebSiteParser.h"
-#include "../common/log.h"
+#include "../include/log.h"
 
 #include <fmt/format.h>
 #include <chrono>

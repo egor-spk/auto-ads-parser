@@ -1,10 +1,11 @@
-#include "common/log.h"
-#include "app/include/Application.h"
-#include "config/include/AppConfig.h"
+#include "log.h"
+#include "include/Application.h"
+#include "include/AppConfig.h"
 
 #include <iostream>
 #include <fmt/color.h>
 #include <fstream>
+#include <filesystem>
 
 int main(int argc, char **argv) try
 {

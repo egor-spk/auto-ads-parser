@@ -1,8 +1,8 @@
 #ifndef AUTO_ADS_PARSER_APPLICATION_H
 #define AUTO_ADS_PARSER_APPLICATION_H
 
-#include "../../config/include/IAppConfig.h"
-#include "../../parser/include/IParser.h"
+#include "IAppConfig.h"
+#include "IParser.h"
 
 #include <nlohmann/json.hpp>
 #include <type_traits>
@@ -18,22 +18,17 @@ public:
 
     ~Application();
 
+    void startParsing() noexcept;
+
     int run();
 
 private:
-    static constexpr const char* AvitoCacheField = "avito";
-    static constexpr const char* AutoruCacheField = "autoru";
-
-    void startParsing() noexcept;
+    static constexpr const char* AvitoJsonField = "avito";
+    static constexpr const char* AutoruJsonField = "autoru";
 
     void stopAll() noexcept;
 
     app_config::IAppConfig &config_;
-
-    // кеш результатов парсинга
-    std::mutex cacheMutex_;
-    nlohmann::json cache_;
-    std::string gzipAds_;
 
     // парсинг
     std::unique_ptr<std::thread> parserThr_;

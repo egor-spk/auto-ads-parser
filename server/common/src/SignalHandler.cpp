@@ -1,5 +1,5 @@
 #include "include/SignalHandler.h"
-#include "../common/log.h"
+#include "include/log.h"
 
 #include <iostream>
 #include <csignal>

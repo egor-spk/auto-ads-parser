@@ -1,3 +1,4 @@
 *
 !bin/
-!example/
+!master/example/
+!slave/example/

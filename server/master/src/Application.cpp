@@ -1,11 +1,12 @@
 #include "include/Application.h"
-#include "../parser/include/IWebPageInfoParser.h"
-#include "../parser/include/IWebSiteTransport.h"
-#include "../parser/include/CurlTransport.h"
-#include "../parser/include/WebSiteParser.h"
-#include "../parser/include/AutoruPageInfoParser.h"
-#include "../parser/include/AvitoPageInfoParser.h"
-#include "include/SignalHandler.h"
+#include "IWebPageInfoParser.h"
+#include "IWebSiteTransport.h"
+#include "CurlTransport.h"
+#include "WebSiteParser.h"
+#include "AutoruPageInfoParser.h"
+#include "AvitoPageInfoParser.h"
+#include "SignalHandler.h"
+#include "ParserRunner.h"
 
 #include <future>
 #include <restinio/all.hpp>
@@ -16,75 +17,6 @@ using server_traits_t = restinio::traits_t<
         restinio::asio_timer_manager_t,
         restinio::null_logger_t,
         router_t>;
-
-namespace
-{
-    /**
-     * @brief Вспомогательный функтор для запуска процесса парсинга в потоке
-     * @tparam T IWebPageInfoParser
-     */
-    template<typename T>
-    class ParserRunner
-    {
-        static_assert(std::is_base_of<parser::IWebPageInfoParser, T>::value,
-                      "T should be derived from IWebPageInfoParser");
-    public:
-        ParserRunner(std::string name, std::string link) :
-                name_{std::move(name)},
-                link_{std::move(link)},
-                parser_{std::make_shared<parser::WebSiteParser>(std::make_unique<parser::CurlTransport>(),
-                                                                std::make_unique<T>(),
-                                                                link_)} {}
-
-        ParserRunner(std::string name,
-                     std::string link,
-                     const std::unordered_map<std::string, std::string> &cookie) :
-                name_{std::move(name)},
-                link_{std::move(link)},
-                parser_{std::make_shared<parser::WebSiteParser>(std::make_unique<parser::CurlTransport>(cookie),
-                                                                std::make_unique<T>(),
-                                                                link_)} {}
-
-        nlohmann::json operator()()
-        {
-            try
-            {
-                using namespace parser;
-                parser_->parse();
-                size_t countResult = parser_->countResult();
-                LOG_INFO("{}: successfully parse {} ads", name_, countResult);
-
-                if (countResult)
-                {
-                    auto jsRes = nlohmann::json::array();
-                    const auto res = parser_->getResult();
-
-                    jsRes.get_ptr<nlohmann::json::array_t *>()->reserve(countResult);
-                    std::transform(res.cbegin(), res.cend(), std::back_inserter(jsRes), [](auto &&ad) { return ad; });
-                    return jsRes;
-                }
-            }
-            catch (const parser::ParseError &e)
-            {
-                LOG_ERROR("{} parsing error: {}", name_, e.what());
-            }
-            catch (const parser::WebSiteTransportError &e)
-            {
-                LOG_ERROR("{} fetch error: {}", name_, e.what());
-            }
-
-            return {};
-        }
-
-        std::shared_ptr<parser::IParser> getParser() const noexcept { return parser_; };
-
-        void clean() noexcept { parser_->clean(); };
-    private:
-        std::string name_;
-        std::string link_;
-        std::shared_ptr<parser::IParser> parser_;
-    };
-}
 
 Application::Application(app_config::IAppConfig &config) :
         config_(config)
@@ -127,6 +59,53 @@ int Application::run()
                 .set_body(gzipAds_);
         auto ba = restinio::transforms::zlib::gzip_body_appender(resp);
         return resp.done();
+    });
+    router->http_post("/v1/:api_key/ad", [this](auto req, auto params)
+    {
+        // проверяем apikey
+        static const auto configApiKey = config_.getApiKey();
+        const auto apiKey = restinio::cast_to<std::string>(params["api_key"]);
+        if (configApiKey != apiKey)
+            req->create_response(restinio::status_forbidden())
+                    .done();
+
+        try
+        {
+            const auto remoteAddress = req->remote_endpoint().address().to_string();
+            LOG_DEBUG("Request from slave: {}", remoteAddress);
+            auto res = nlohmann::json::parse(req->body());
+            std::lock_guard<std::mutex> _{cacheMutex_};
+            const bool containsAutoru = res.contains(AutoruJsonField);
+            if (containsAutoru)
+            {
+                auto& autoru = cache_[AutoruJsonField];
+                autoru[ItemsJsonField] = std::move(res[AutoruJsonField]);
+                autoru[DateTimeJsonField] = getCurrentDateTime();
+                LOG_DEBUG("Found auto.ru ads");
+            }
+            const bool containsAvito = res.contains(AvitoJsonField);
+            if (containsAvito)
+            {
+                auto& avito = cache_[AvitoJsonField];
+                avito[ItemsJsonField] = std::move(res[AvitoJsonField]);
+                avito[DateTimeJsonField] = getCurrentDateTime();
+                LOG_DEBUG("Found avito ads");
+            }
+            if (containsAutoru || containsAvito)
+            {
+                gzipAds_ = restinio::transforms::zlib::gzip_compress(cache_.dump(), 9);
+                LOG_INFO("Successfully update ads from slave: {}", remoteAddress);
+            }
+            logger->flush();
+            return req->create_response(restinio::status_ok()).done();
+        }
+        catch (const std::exception &e)
+        {
+            LOG_ERROR("Uncaught exception: {}", e.what());
+            return req->create_response(restinio::status_bad_request())
+                    .connection_close()
+                    .done();
+        }
     });
     restinio::http_server_t<server_traits_t> server{
             restinio::own_io_context(),
@@ -213,7 +192,9 @@ void Application::startParsing() noexcept
                 if (!autoruRes.empty())
                 {
                     std::lock_guard<std::mutex> _{cacheMutex_};
-                    cache_[AutoruCacheField] = std::move(autoruRes);
+                    auto& autoruJson = cache_[AutoruJsonField];
+                    autoruJson[ItemsJsonField] = std::move(autoruRes);
+                    autoruJson[DateTimeJsonField] = getCurrentDateTime();
                     isChange = true;
                 } else
                 {
@@ -229,7 +210,9 @@ void Application::startParsing() noexcept
                 if (!avitoRes.empty())
                 {
                     std::lock_guard<std::mutex> _{cacheMutex_};
-                    cache_[AvitoCacheField] = std::move(avitoRes);
+                    auto& autoruJson = cache_[AvitoJsonField];
+                    autoruJson[ItemsJsonField] = std::move(avitoRes);
+                    autoruJson[DateTimeJsonField] = getCurrentDateTime();
                     isChange = true;
                 } else
                 {
@@ -279,5 +262,11 @@ void Application::stopAll() noexcept
         isWork = false;
     }
     waitCv_.notify_one();
+}
+
+std::string Application::getCurrentDateTime() const
+{
+    std::time_t t = std::time(nullptr);
+    return fmt::format("{:%d-%m-%Y %H:%M:%S}", *std::localtime(&t));
 }
 

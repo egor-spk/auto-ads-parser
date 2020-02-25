@@ -2,7 +2,7 @@
 #define AUTO_ADS_PARSER_IAPPCONFIG_H
 
 #include <iosfwd>
-#include "../../common/log.h"
+#include "log.h"
 
 namespace app_config
 {

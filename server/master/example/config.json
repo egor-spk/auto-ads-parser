@@ -1,0 +1,8 @@
+{
+  "autoru": "https://auto.ru/moskva/cars/hyundai/solaris/20922677/used/?catalog_equipment=front-centre-armrest&km_age_to=60000&owners_count_group=ONE&transmission=AUTOMATIC&sort=fresh_relevance_1-desc&output_type=list&page={}",
+  "avito": "https://www.avito.ru/moskva/avtomobili/s_probegom/hyundai/solaris/avtomat/odin_vladelec?cd=1&pmin=600000&radius=0&f=188_19775b0.1286_14765b0&p={}",
+  "port": 8080,
+  "loglevel": "trace",
+  "api_key": "test",
+  "log_path": "/var/log/parser-master"
+}
