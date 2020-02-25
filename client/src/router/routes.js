@@ -3,9 +3,8 @@ const routes = [
   {
     path: '/',
     component: () => import('layouts/MainLayout.vue'),
-    redirect: '/ads',
     children: [
-      { path: 'ads', component: () => import('pages/Ads.vue'), meta: { title: 'Объявления' } },
+      { path: '', component: () => import('pages/Ads.vue'), meta: { title: 'Объявления' } },
       { path: 'charts', component: () => import('pages/Charts.vue'), meta: { title: 'Графики' } },
       { path: 'settings', component: () => import('pages/Settings.vue'), meta: { title: 'Настройки' } },
       { path: 'favorite', component: () => import('pages/Favorite.vue'), meta: { title: 'Избранное' } },
