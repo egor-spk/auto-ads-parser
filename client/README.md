@@ -1,23 +1,34 @@
-# Auto ads (auto-ads-parser)
+# Client (auto-ads-parser)
 
-Отображение результатов парсера сайтов авто объявлений
+Гибридное приложение на основе фреймворка [Quasar](https://quasar.dev/). Скриншоты:
 
-## Install the dependencies
+![1](img/1.jpg "1") ![2](img/2.jpg "2")  
+![3](img/3.jpg "3") ![5](img/5.jpg "5")   
+![4](img/4.jpg "4")  
+
+## Основные команды
+### Установка зависимостей
 ```bash
 npm install
 ```
 
-### Start the app in development mode (hot-code reloading, error reporting, etc.)
+### Старт приложения в режиме разработки
+SPA:
 ```bash
-quasar dev -m
+npm run dev
 ```
 
-### Lint the files
+Android:
+```bash
+npm run android-dev
+```
+
+### Линтер файлов
 ```bash
 npm run lint
 ```
 
-### Build the app for production
+### Сборка android приложения
 ```bash
-quasar build
+npm run android-build
 ```
