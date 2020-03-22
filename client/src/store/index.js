@@ -60,12 +60,12 @@ export default function () {
         }
       },
       setFavorite (state, favorite) {
-        state.favorite = JSON.parse(favorite)
-        LocalStorage.set('favorite', favorite)
+        state.favorite = favorite
+        LocalStorage.set('favorite', JSON.stringify(favorite))
       },
       setIgnore (state, ignore) {
-        state.ignore = JSON.parse(ignore)
-        LocalStorage.set('ignore', ignore)
+        state.ignore = ignore
+        LocalStorage.set('ignore', JSON.stringify(ignore))
       }
     },
     actions: {
@@ -80,15 +80,25 @@ export default function () {
 
         commit('setSettings', settings)
       },
-      fetchFavorite ({ commit }) {
-        const favorite = LocalStorage.getItem('favorite')
+      fetchFavorite ({ commit, getters }) {
+        let favorite = LocalStorage.getItem('favorite')
         if (favorite !== null) {
+          favorite = JSON.parse(favorite)
+          // оставляем только существующие объявления
+          favorite = favorite.filter(favoriteId => {
+            return getters.allAds.find(adItem => favoriteId === adItem.id) !== undefined
+          })
           commit('setFavorite', favorite)
         }
       },
-      fetchIgnore ({ commit }) {
-        const ignore = LocalStorage.getItem('ignore')
+      fetchIgnore ({ commit, getters }) {
+        let ignore = LocalStorage.getItem('ignore')
         if (ignore !== null) {
+          ignore = JSON.parse(ignore)
+          // оставляем только существующие объявления
+          ignore = ignore.filter(ignoreId => {
+            return getters.allAds.find(adItem => ignoreId === adItem.id) !== undefined
+          })
           commit('setIgnore', ignore)
         }
       },
@@ -108,9 +118,9 @@ export default function () {
       },
       async fetchData ({ dispatch }) {
         await dispatch('fetchSettings')
+        await dispatch('fetchAds')
         await dispatch('fetchIgnore')
         await dispatch('fetchFavorite')
-        await dispatch('fetchAds')
       }
     },
     getters: {
@@ -130,6 +140,16 @@ export default function () {
       },
       ads (state, getters) {
         return [...getters.autoRuAds, ...getters.avitoAds]
+      },
+      allAds (state) {
+        let avito = [], autoru = []
+        if ('avito' in state.ads) {
+          avito = state.ads.avito.items
+        }
+        if ('autoru' in state.ads) {
+          autoru = state.ads.autoru.items
+        }
+        return [...avito, ...autoru]
       },
       favorite (state) {
         let autoru = []

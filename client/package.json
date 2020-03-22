@@ -1,6 +1,6 @@
 {
   "name": "auto-ads",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Отображение результатов парсера сайтов авто объявлений",
   "productName": "Auto ads",
   "cordovaId": "org.auto.ads.app",
